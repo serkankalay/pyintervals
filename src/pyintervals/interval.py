@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 @dataclass(frozen=True)
@@ -17,3 +17,6 @@ class Interval:
 
     def is_degenerate(self) -> bool:
         return self.start == self.end
+    
+    def duration(self) -> timedelta:
+        return self.end - self.start
