@@ -1,12 +1,9 @@
 Changelog
- =========
+=========
 
- 0.1.0 (2022-??-??)
- ------------------
+0.0.1 (2023-10-04)
+------------------
 
- - First usable version
+**Added**
 
- 0.0.1 (2023-10-04)
- ------------------
-
- - Initial release
+- 🌱 Create a simple and minimal `Interval` object.

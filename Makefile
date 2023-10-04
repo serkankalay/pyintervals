@@ -31,7 +31,7 @@ mypy:
 
 .PHONY: test
 test:
-	pytest --cov=pdfje
+	pytest --cov=pyintervals
 
 .PHONY: docs
 docs:
