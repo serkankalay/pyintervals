@@ -1,5 +1,5 @@
 📐 pyintervals
-========
+===============================
 
 **Execute efficient interval operations in Python.**
 
