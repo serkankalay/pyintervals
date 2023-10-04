@@ -1,0 +1,65 @@
+[tool.poetry]
+name = "pyintervals"
+version = "0.0.1"
+description = "Efficient interval operations."
+authors = ["Serkan Kalay <serkanosmankalay@gmail.com>"]
+license = "MIT"
+classifiers = [
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+readme = "README.rst"
+packages = [{include = "pyintervals", from = "src"}]
+include = ["CHANGELOG.rst", "README.rst"]
+repository = "https://github.com/serkankalay/pyintervals"
+keywords = [
+    "interval",
+    "timespan",
+]
+
+[tool.poetry.dependencies]
+python = "^3.8.1,<4.0"
+importlib-metadata = {version = ">=1,<5", python = "<3.8"}
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.0.1"
+pytest-cov = "^4.0.0"
+
+[tool.poetry.group.typecheck.dependencies]
+mypy = "^0.982"
+
+[tool.poetry.group.linting.dependencies]
+black = "^22.10"
+flake8 = "^5.0.4"
+isort = "^5.7.0"
+slotscheck = "^0.17.0"
+
+[tool.poetry.group.dev.dependencies]
+tox = "^3.26"
+
+[tool.black]
+line-length = 79
+include = '\.pyi?$'
+exclude = '''
+/(
+\.eggs
+| \.git
+| \.mypy_cache
+| \.tox
+| \.venv
+| _build
+| build
+| dist
+)/
+'''
+
+[tool.isort]
+line_length = 79
+profile = 'black'
+add_imports = ['from __future__ import annotations']
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
