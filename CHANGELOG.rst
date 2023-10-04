@@ -6,4 +6,4 @@ Changelog
 
 **Added**
 
-- 🌱 Create a simple and minimal `Interval` object.
+- 🌱 Create a simple and minimal `Interval` object having duration and degeneracy information.
