@@ -20,3 +20,14 @@ def test_valid_interval():
         start=datetime(2023, 1, 1, 9, 5),
         end=datetime(2024, 1, 1, 9, 5),
     )
+
+
+def test_degenerate_interval():
+    assert Interval(
+        start=datetime(2023, 1, 1, 9, 5),
+        end=datetime(2023, 1, 1, 9, 5),
+    ).is_degenerate()
+    assert not Interval(
+        start=datetime(2023, 1, 1, 9, 5),
+        end=datetime(2023, 1, 1, 9, 6),
+    ).is_degenerate()

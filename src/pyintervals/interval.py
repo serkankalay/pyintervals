@@ -14,3 +14,6 @@ class Interval:
             raise RuntimeError(
                 f"Invalid interval: {self.end=} is earlier than {self.start=}"
             )
+
+    def is_degenerate(self) -> bool:
+        return self.start == self.end
