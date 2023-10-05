@@ -4,7 +4,7 @@ from datetime import timedelta
 
 import pytest
 
-from pyintervals.interval import Interval, overlaps
+from pyintervals import Interval, overlaps
 from tests.helpers import NOT_SO_IMPORTANT_LATER_DATE, THE_DATE
 
 

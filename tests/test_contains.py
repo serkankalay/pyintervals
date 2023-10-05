@@ -4,7 +4,7 @@ from datetime import timedelta
 
 import pytest
 
-from pyintervals.interval import Interval, contains
+from pyintervals import Interval, contains
 from tests.helpers import NOT_SO_IMPORTANT_LATER_DATE, THE_DATE
 
 

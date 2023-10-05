@@ -11,7 +11,10 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
 ]
 readme = "README.rst"
-packages = [{include = "pyintervals", from = "src"}]
+packages = [
+    {include = "pyintervals", from = "src"},
+    {include = "pyintervals/py.typed", from = "src"}
+]
 include = ["CHANGELOG.rst", "README.rst"]
 repository = "https://github.com/serkankalay/pyintervals"
 keywords = [
