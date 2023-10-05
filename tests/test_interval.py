@@ -10,24 +10,24 @@ from pyintervals.interval import Interval
 @pytest.fixture
 def regular_interval() -> Interval:
     return Interval(
-        start=datetime(2023, 1, 1, 9, 5),
-        end=datetime(2024, 1, 1, 9, 5),
+        start=datetime(2017, 5, 20, 12, 15),
+        end=datetime(2023, 10, 29, 9, 5),
     )
 
 
 @pytest.fixture
 def degenerate_interval() -> Interval:
     return Interval(
-        start=datetime(2023, 1, 1, 9, 5),
-        end=datetime(2023, 1, 1, 9, 5),
+        start=datetime(2017, 5, 20, 12, 15),
+        end=datetime(2017, 5, 20, 12, 15),
     )
 
 
 def test_invalid_interval():
     with pytest.raises(RuntimeError):
         Interval(
-            start=datetime(2023, 1, 1, 9, 5),
-            end=datetime(2022, 1, 1, 9, 5),
+            start=datetime(2017, 5, 21, 10, 45),
+            end=datetime(2017, 5, 20, 12, 15),
         )
 
 
@@ -42,18 +42,19 @@ def test_degenerate_interval(degenerate_interval, regular_interval):
 
 @pytest.fixture
 def interval_of_1_day() -> Interval:
-    start=datetime(2023, 1, 1, 0, 0)
+    start = datetime(2017, 5, 20, 12, 15)
     return Interval(
         start=start,
-        end=start+timedelta(days=1),
+        end=start + timedelta(days=1),
     )
+
 
 @pytest.fixture
 def interval_of_1_hour() -> Interval:
-    start=datetime(2023, 1, 1, 0, 0)
+    start = datetime(2017, 5, 20, 12, 15)
     return Interval(
         start=start,
-        end=start+timedelta(hours=1),
+        end=start + timedelta(hours=1),
     )
 
 
@@ -63,7 +64,7 @@ def interval_of_1_hour() -> Interval:
         ("interval_of_1_hour", timedelta(hours=1)),
         ("interval_of_1_day", timedelta(days=1)),
         ("degenerate_interval", timedelta()),
-    ]
+    ],
 )
 def test_interval_duration(request, interval, expected_duration):
     assert request.getfixturevalue(interval).duration() == expected_duration

@@ -17,6 +17,6 @@ class Interval:
 
     def is_degenerate(self) -> bool:
         return self.start == self.end
-    
+
     def duration(self) -> timedelta:
         return self.end - self.start
