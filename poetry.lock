@@ -489,22 +489,6 @@ files = [
 ]
 
 [[package]]
-name = "slotscheck"
-version = "0.17.0"
-description = "Ensure your __slots__ are working properly."
-category = "dev"
-optional = false
-python-versions = ">=3.8.1,<4"
-files = [
-    {file = "slotscheck-0.17.0-py3-none-any.whl", hash = "sha256:7ff6d6cc5e58e12f96c82bf192e6498412dd6fc3aa230937f32935c2151b3d2e"},
-    {file = "slotscheck-0.17.0.tar.gz", hash = "sha256:5e4ccb16148825b6a644705a4f8ca30855c853e4a777229ec5ed1ee4a55fa97c"},
-]
-
-[package.dependencies]
-click = ">=8.0,<9.0"
-tomli = {version = ">=0.2.6,<3.0.0", markers = "python_version < \"3.11\""}
-
-[[package]]
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
@@ -579,4 +563,4 @@ testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.1,<4.0"
-content-hash = "3391af1ea0a3c1ad00f0314c753689cf0a7f1b4aa030e29586250d6ab5fba94d"
+content-hash = "b8ff62680dceab320087b94d89acbd98e512c70318d960b15a7c91e6cd463e8a"

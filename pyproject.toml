@@ -35,7 +35,6 @@ mypy = "^0.982"
 black = "^22.10"
 flake8 = "^5.0.4"
 isort = "^5.7.0"
-slotscheck = "^0.17.0"
 
 [tool.poetry.group.dev.dependencies]
 tox = "^3.26"
