@@ -41,4 +41,4 @@ def overlaps(interval: Interval, other: Interval) -> bool:
     else:
         first, second = other, interval
 
-    return not second.start >= first.end
+    return second.start < first.end
