@@ -20,3 +20,25 @@ class Interval:
 
     def duration(self) -> timedelta:
         return self.end - self.start
+
+
+def overlaps(interval: Interval, other: Interval) -> bool:
+
+    # If both are degenerate, then we should check whether they're at the exact same time.
+    if interval.is_degenerate() and other.is_degenerate():
+        return interval.start == other.start
+
+    # If only 1 is degenerate, then we check that point is included in the other.
+    if interval.is_degenerate():
+        return other.start <= interval.start < other.end
+
+    if other.is_degenerate():
+        return interval.start <= other.start < interval.end
+
+    # We have 2 non-degenerate intervals. We take them in order and check whether they're exclusive.
+    if interval.start <= other.start:
+        first, second = interval, other
+    else:
+        first, second = other, interval
+
+    return not second.start >= first.end
