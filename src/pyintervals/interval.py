@@ -21,6 +21,9 @@ class Interval:
     def duration(self) -> timedelta:
         return self.end - self.start
 
+    def overlaps_with(self, other: Interval) -> bool:
+        return overlaps(self, other)
+
 
 def overlaps(interval: Interval, other: Interval) -> bool:
 

@@ -124,3 +124,5 @@ from tests.helpers import NOT_SO_IMPORTANT_LATER_DATE, THE_DATE
 def test_overlaps(first, second, answer):
     assert overlaps(first, second) == answer
     assert overlaps(second, first) == answer
+    assert first.overlaps_with(second) == answer
+    assert second.overlaps_with(first) == answer
