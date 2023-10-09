@@ -26,5 +26,5 @@ Following resources and people have inspired **pyintervals**:
 - `Always use [closed, open) intervals <https://fhur.me/posts/always-use-closed-open-intervalshttps://fhur.me/posts/always-use-closed-open-intervals>`_
 - `Arie Bovenberg <https://github.com/ariebovenberg>`_
 - `pdfje (for initial setup of this project) <https://github.com/ariebovenberg/pdfje>`_
-- Sam de Wringer
+- `Sam de Wringer <https://github.com/samdewr>`_
 - Tim Lamballais-Tessensohn
