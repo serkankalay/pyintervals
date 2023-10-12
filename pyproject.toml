@@ -35,12 +35,12 @@ pytest-benchmark = "^4.0.0"
 mypy = ">=0.982,<1.7"
 
 [tool.poetry.group.linting.dependencies]
-black = "^22.10"
+black = ">=22.10,<24.0"
 flake8 = "^5.0.4"
 isort = "^5.7.0"
 
 [tool.poetry.group.dev.dependencies]
-tox = "^3.26"
+tox = ">=3.26,<5.0"
 
 [tool.black]
 line-length = 79
