@@ -1,6 +1,24 @@
 📐 pyintervals
 ===============================
 
+.. image:: https://img.shields.io/pypi/v/pyintervals.svg?style=flat-square&color=blue
+   :target: https://pypi.python.org/pypi/pyintervals
+
+.. image:: https://img.shields.io/pypi/pyversions/pyintervals.svg?style=flat-square
+   :target: https://pypi.python.org/pypi/pyintervals
+
+.. image:: https://img.shields.io/pypi/l/pyintervals.svg?style=flat-square&color=blue
+   :target: https://pypi.python.org/pypi/pyintervals
+
+.. image:: https://img.shields.io/badge/mypy-strict-forestgreen?style=flat-square
+   :target: https://mypy.readthedocs.io/en/stable/command_line.html#cmdoption-mypy-strict
+
+.. image:: https://img.shields.io/badge/coverage-99%25-forestgreen?style=flat-square
+   :target: https://github.com/serkankalay/pyintervals
+
+.. image::  https://img.shields.io/github/actions/workflow/status/serkankalay/pyintervals/tests.yml?branch=master&style=flat-square
+   :target: https://github.com/serkankalay/pyintervals
+
 **Execute efficient interval operations in Python.**
 
 *(Currently in active development. Leave a* ⭐️ *on GitHub if you're interested how this develops!)*
