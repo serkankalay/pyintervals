@@ -1,33 +1,34 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import pytest
 
-from pyintervals.interval import Interval
+from pyintervals import Interval
+from tests.helpers import FUTURE_DATE, NOT_SO_IMPORTANT_LATER_DATE, THE_DATE
 
 
 @pytest.fixture
 def regular_interval() -> Interval:
     return Interval(
-        start=datetime(2017, 5, 20, 12, 15),
-        end=datetime(2023, 10, 29, 9, 5),
+        start=THE_DATE,
+        end=FUTURE_DATE,
     )
 
 
 @pytest.fixture
 def degenerate_interval() -> Interval:
     return Interval(
-        start=datetime(2017, 5, 20, 12, 15),
-        end=datetime(2017, 5, 20, 12, 15),
+        start=THE_DATE,
+        end=THE_DATE,
     )
 
 
 def test_invalid_interval():
     with pytest.raises(RuntimeError):
         Interval(
-            start=datetime(2017, 5, 21, 10, 45),
-            end=datetime(2017, 5, 20, 12, 15),
+            start=NOT_SO_IMPORTANT_LATER_DATE,
+            end=THE_DATE,
         )
 
 
@@ -42,7 +43,7 @@ def test_degenerate_interval(degenerate_interval, regular_interval):
 
 @pytest.fixture
 def interval_of_1_day() -> Interval:
-    start = datetime(2017, 5, 20, 12, 15)
+    start = THE_DATE
     return Interval(
         start=start,
         end=start + timedelta(days=1),
@@ -51,7 +52,7 @@ def interval_of_1_day() -> Interval:
 
 @pytest.fixture
 def interval_of_1_hour() -> Interval:
-    start = datetime(2017, 5, 20, 12, 15)
+    start = THE_DATE
     return Interval(
         start=start,
         end=start + timedelta(hours=1),
