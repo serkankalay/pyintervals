@@ -38,7 +38,7 @@ isort = "^5.7.0"
 slotscheck = "^0.17.0"
 
 [tool.poetry.group.dev.dependencies]
-tox = "^3.26"
+tox = ">=3.26,<5.0"
 
 [tool.black]
 line-length = 79
