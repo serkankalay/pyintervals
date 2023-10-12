@@ -118,8 +118,7 @@ Start with **pyintervals** right away with
 
   pip install pyintervals
 
-.. _roadmap
-
+.. _roadmap:
 Roadmap
 ---------
 **pyintervals** is in active development and not feature complete yet. Please see below
