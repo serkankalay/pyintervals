@@ -64,3 +64,23 @@ def test_add_intervals(
     prev_count = len(handler.intervals)
     handler.add(new_intervals)
     assert prev_count + len(new_intervals) == len(handler.intervals)
+    
+    
+def test_remove_intervals(
+    interval_handler_w_2_intervals: IntervalHandler
+) -> None:
+    handler = interval_handler_w_2_intervals
+    original_count = len(handler.intervals)
+    
+    # Remove no interval
+    handler.remove([])
+    assert original_count == len(handler.intervals)
+    
+    # Remove 1 interval
+    to_remove = handler.intervals[0]
+    handler.remove([to_remove])
+    assert original_count - 1 == len(handler.intervals)
+    
+    # Remove all
+    handler.remove(handler.intervals)
+    assert len(handler.intervals) == 0

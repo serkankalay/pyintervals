@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Iterable, Collection
 
 from .interval import Interval
 
@@ -19,3 +19,6 @@ class IntervalHandler:
 
     def add(self, intervals: Iterable[Interval]) -> None:
         self.__intervals.extend(intervals)
+        
+    def remove(self, intervals: Collection[Interval]) -> None:
+        self.__intervals = [i for i in self.__intervals if i not in intervals]
