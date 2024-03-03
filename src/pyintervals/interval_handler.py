@@ -11,7 +11,7 @@ from .interval import Interval
 class TimeValueIntervalNode:
     time_point: datetime
     __intervals: list[Interval] = field(default_factory=list)
-    
+
     @property
     def intervals(self) -> list[Interval]:
         return list(self.__intervals)
@@ -25,7 +25,7 @@ class IntervalHandler:
     def __init__(self, intervals: Iterable[Interval] = []):
         self._initialize()
         self.add(intervals)
-        
+
     def _initialize(self) -> None:
         self.__intervals = list()
         self.__projection_graph = list()
@@ -36,6 +36,6 @@ class IntervalHandler:
 
     def add(self, intervals: Iterable[Interval]) -> None:
         self.__intervals.extend(intervals)
-        
+
     def remove(self, intervals: Collection[Interval]) -> None:
         self.__intervals = [i for i in self.__intervals if i not in intervals]
