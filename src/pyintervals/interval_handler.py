@@ -1,26 +1,20 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Iterable, Collection
+from typing import Iterable, Collection, Sequence
 
 from .interval import Interval
+from .time_value_node import TimeValueNode
 
-
-@dataclass(frozen=True)
-class TimeValueIntervalNode:
-    time_point: datetime
-    __intervals: list[Interval] = field(default_factory=list)
-
-    @property
-    def intervals(self) -> list[Interval]:
-        return list(self.__intervals)
+# Unix epoch
+_TIME_ZERO: datetime = datetime(1970, 1, 1)
 
 
 @dataclass
 class IntervalHandler:
     __intervals: list[Interval]
-    __projection_graph: list[TimeValueIntervalNode]
+    __projection_graph: list[TimeValueNode]
 
     def __init__(self, intervals: Iterable[Interval] = []):
         self._initialize()
@@ -28,7 +22,7 @@ class IntervalHandler:
 
     def _initialize(self) -> None:
         self.__intervals = list()
-        self.__projection_graph = list()
+        self.__projection_graph = [TimeValueNode(time_point=_TIME_ZERO)]
 
     @property
     def intervals(self) -> list[Interval]:
@@ -39,3 +33,6 @@ class IntervalHandler:
 
     def remove(self, intervals: Collection[Interval]) -> None:
         self.__intervals = [i for i in self.__intervals if i not in intervals]
+
+    def projection_graph(self) -> Sequence[TimeValueNode]:
+        return list(self.__projection_graph)

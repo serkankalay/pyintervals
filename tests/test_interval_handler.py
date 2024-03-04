@@ -5,31 +5,47 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 
 from pyintervals import Interval
-from pyintervals.interval_handler import IntervalHandler
+from pyintervals.interval_handler import IntervalHandler, _TIME_ZERO
 
 
 @pytest.mark.parametrize(
-    "intervals, expected_count",
+    "intervals, expected_interval_count, expected_tvn_count, expected_tvn_time_point_set",
     [
-        ([], 0),
-        ([Interval(datetime(2023, 10, 6), datetime(2024, 2, 29))], 1),
+        ([], 0, 1, {_TIME_ZERO}),
         (
-            [
-                Interval(datetime(2023, 10, 6), datetime(2024, 2, 29)),
-                Interval(datetime(2023, 10, 6), datetime(2023, 10, 6)),
-                Interval(datetime(2024, 12, 4), datetime(2025, 2, 28)),
-                Interval(datetime(2025, 11, 4), datetime(2027, 2, 27)),
-            ],
-            4,
+            [Interval(datetime(2023, 10, 6), datetime(2024, 2, 29))],
+            1,
+            3,
+            {
+                _TIME_ZERO,
+                datetime(2023, 10, 6),
+                datetime(2024, 2, 29),
+            },
         ),
+        # (
+        #     [
+        #         Interval(datetime(2023, 10, 6), datetime(2024, 2, 29)),
+        #         Interval(datetime(2023, 10, 6), datetime(2023, 10, 6)),
+        #         Interval(datetime(2024, 12, 4), datetime(2025, 2, 28)),
+        #         Interval(datetime(2025, 11, 4), datetime(2027, 2, 27)),
+        #     ],
+        #     4,
+        # ),
     ],
 )
 def test_interval_handler_with_intervals(
     intervals: Iterable[Interval],
-    expected_count: int,
+    expected_interval_count: int,
+    expected_tvn_count: int,
+    expected_tvn_time_point_set: set[datetime],
 ) -> None:
     handler = IntervalHandler(intervals=intervals)
-    assert len(handler.intervals) == expected_count
+    assert len(handler.intervals) == expected_interval_count
+    assert len(handler.projection_graph()) == expected_tvn_count
+    assert (
+        set(tvn.time_point for tvn in handler.projection_graph())
+        == expected_tvn_time_point_set
+    )
 
 
 @pytest.fixture
