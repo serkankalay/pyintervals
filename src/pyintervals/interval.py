@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
 
@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 class Interval:
     start: datetime
     end: datetime
+    value: float = field(default=0)
 
     def __post_init__(self) -> None:
         if self.start > self.end:
