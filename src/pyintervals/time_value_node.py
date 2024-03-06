@@ -39,3 +39,13 @@ class TimeValueNode:
 
     def _add_intervals(self, intervals: Iterable[Interval]) -> None:
         self.__intervals.extend(intervals)
+
+    @staticmethod
+    def clone(
+        given: TimeValueNode, to_time: datetime | None = None
+    ) -> TimeValueNode:
+        return (
+            TimeValueNode(given.time_point, given.__intervals)
+            if not to_time
+            else TimeValueNode(to_time, given.__intervals)
+        )

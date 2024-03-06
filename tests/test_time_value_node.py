@@ -1,3 +1,4 @@
+import dataclasses
 from datetime import datetime
 from typing import Iterable
 
@@ -109,3 +110,49 @@ def test_time_value_node_comparison(
     assert (tvn > other) == is_gt
     assert (tvn <= other) == is_le
     assert (tvn >= other) == is_ge
+
+
+@pytest.mark.parametrize(
+    "tvn, to_time",
+    [
+        # Without intervals
+        (
+            TimeValueNode(datetime(1975, 1, 1)),
+            None,
+        ),
+        # Without intervals, but time
+        (
+            TimeValueNode(datetime(1975, 1, 1)),
+            datetime(2014, 9, 12),
+        ),
+        # With intervals
+        (
+            _tvn_with_intervals(
+                TimeValueNode(datetime(1975, 1, 1)),
+                intervals=[
+                    Interval(datetime(1970, 1, 1), datetime(2000, 1, 1))
+                ],
+            ),
+            None,
+        ),
+        # With intervals and time
+        (
+            _tvn_with_intervals(
+                TimeValueNode(datetime(1975, 1, 1)),
+                intervals=[
+                    Interval(datetime(1970, 1, 1), datetime(2000, 1, 1))
+                ],
+            ),
+            datetime(2014, 9, 12),
+        ),
+    ],
+)
+def test_clone_time_value_node(
+    tvn: TimeValueNode, to_time: datetime | None
+) -> None:
+    to_compare = (
+        tvn
+        if to_time is None
+        else dataclasses.replace(tvn, time_point=to_time)
+    )
+    assert to_compare == TimeValueNode.clone(tvn, to_time)
