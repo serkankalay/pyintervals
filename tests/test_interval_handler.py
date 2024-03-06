@@ -5,7 +5,12 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 
 from pyintervals import Interval
-from pyintervals.interval_handler import IntervalHandler, _TIME_ZERO
+from pyintervals.interval_handler import (
+    IntervalHandler,
+    _TIME_ZERO,
+    _make_range,
+)
+from pyintervals.time_value_node import TimeValueNode
 
 
 @pytest.mark.parametrize(
@@ -22,6 +27,7 @@ from pyintervals.interval_handler import IntervalHandler, _TIME_ZERO
                 datetime(2024, 2, 29),
             },
         ),
+        # TODO
         # (
         #     [
         #         Interval(datetime(2023, 10, 6), datetime(2024, 2, 29)),
@@ -100,3 +106,55 @@ def test_remove_intervals(
     # Remove all
     handler.remove(handler.intervals)
     assert len(handler.intervals) == 0
+
+
+@pytest.mark.parametrize(
+    "nodes, new_interval",
+    [
+        # Degenerate same-time
+        (
+            [TimeValueNode(datetime(2070, 1, 1))],
+            Interval(datetime(2070, 1, 1), datetime(2070, 1, 1)),
+        ),
+        # Normal, starting same-time
+        (
+            [TimeValueNode(datetime(2070, 1, 1))],
+            Interval(datetime(2070, 1, 1), datetime(2075, 1, 1)),
+        ),
+        # Normal, starting later
+        (
+            [TimeValueNode(datetime(2070, 1, 1))],
+            Interval(datetime(2075, 1, 1), datetime(2076, 1, 1)),
+        ),
+        # Normal, starting earlier
+        # Note, we have an earlier default node (as IntervalHandler will have)
+        (
+            [
+                TimeValueNode(datetime(1970, 1, 1)),
+                TimeValueNode(datetime(2070, 1, 1)),
+            ],
+            Interval(datetime(2060, 1, 1), datetime(2065, 1, 1)),
+        ),
+        # Normal, starting earlier, ending-exactly the same time
+        # Note, we have an earlier default node (as IntervalHandler will have)
+        (
+            [
+                TimeValueNode(datetime(2070, 1, 1)),
+            ],
+            Interval(datetime(2060, 1, 1), datetime(2070, 1, 1)),
+        ),
+        # Empty node graph
+        # Note, we have an earlier default node (as IntervalHandler will have)
+        (
+            [],
+            Interval(datetime(2060, 1, 1), datetime(2070, 1, 1)),
+        ),
+    ],
+)
+def test_make_range(
+    nodes: list[TimeValueNode], new_interval: Interval
+) -> None:
+    _make_range(nodes, new_interval)
+    assert {new_interval.start, new_interval.end}.issubset(
+        {n.time_point for n in nodes}
+    )
