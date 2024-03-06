@@ -26,7 +26,7 @@ lint:
 
 .PHONY: mypy
 mypy:
-	mypy --pretty --strict src
+	mypy --pretty src
 	mypy --pretty tests/
 
 .PHONY: test

@@ -3,7 +3,9 @@ from __future__ import annotations
 import bisect
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Iterable, Collection, Sequence, MutableSequence
+from typing import Collection, Iterable, MutableSequence, Sequence
+
+from sortedcontainers import SortedList
 
 from .interval import Interval
 from .search import weak_predecessor
@@ -41,7 +43,7 @@ def _make_range(
 @dataclass
 class IntervalHandler:
     __intervals: list[Interval]
-    __projection_graph: list[TimeValueNode]
+    __projection_graph: SortedList
 
     def __init__(self, intervals: Iterable[Interval] = []):
         self._initialize()
@@ -49,7 +51,9 @@ class IntervalHandler:
 
     def _initialize(self) -> None:
         self.__intervals = list()
-        self.__projection_graph = [TimeValueNode(time_point=_TIME_ZERO)]
+        self.__projection_graph = SortedList(
+            [TimeValueNode(time_point=_TIME_ZERO)]
+        )
 
     @property
     def intervals(self) -> list[Interval]:

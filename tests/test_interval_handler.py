@@ -1,20 +1,22 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Iterable, Any, Sequence
+from typing import Iterable, Sequence
 
 import pytest
 from _pytest.fixtures import FixtureRequest
 
 from pyintervals import Interval
 from pyintervals.interval_handler import (
-    IntervalHandler,
     _TIME_ZERO,
+    IntervalHandler,
     _make_range,
 )
 from pyintervals.time_value_node import TimeValueNode
 
 
 @pytest.mark.parametrize(
-    "intervals, expected_interval_count, expected_tvn_count, expected_tvn_time_point_set",
+    "intervals,n_expected_intervals,n_expected_tvn,expected_tvn_time_points",
     [
         ([], 0, 1, {_TIME_ZERO}),
         (
@@ -41,16 +43,16 @@ from pyintervals.time_value_node import TimeValueNode
 )
 def test_interval_handler_with_intervals(
     intervals: Iterable[Interval],
-    expected_interval_count: int,
-    expected_tvn_count: int,
-    expected_tvn_time_point_set: set[datetime],
+    n_expected_intervals: int,
+    n_expected_tvn: int,
+    expected_tvn_time_points: set[datetime],
 ) -> None:
     handler = IntervalHandler(intervals=intervals)
-    assert len(handler.intervals) == expected_interval_count
-    assert len(handler.projection_graph()) == expected_tvn_count
+    assert len(handler.intervals) == n_expected_intervals
+    assert len(handler.projection_graph()) == n_expected_tvn
     assert (
         set(tvn.time_point for tvn in handler.projection_graph())
-        == expected_tvn_time_point_set
+        == expected_tvn_time_points
     )
 
 

@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 import bisect
-from typing import TypeVar, Sequence
+from typing import Sequence, TypeVar
+
+from sortedcontainers import SortedList
 
 T = TypeVar("T")
 
 
 def weak_predecessor(sorted_sequence: Sequence[T], point: T) -> T | None:
+    assert isinstance(sorted_sequence, SortedList), "Container must be sorted."
+
     # If the passed sequence is empty, then no predecessor.
     if not sorted_sequence:
         return None
