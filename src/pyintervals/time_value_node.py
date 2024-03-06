@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Iterable
 
 from pyintervals import Interval
 
@@ -16,10 +17,13 @@ class TimeValueNode:
         return list(self.__intervals)
 
     def __eq__(self, other: TimeValueNode) -> bool:
-        return self.time_point == other.time_point
+        return (
+            self.time_point == other.time_point
+            and self.__intervals == other.__intervals
+        )
 
     def __ne__(self, other: TimeValueNode) -> bool:
-        return self.time_point != other.time_point
+        return not (self == other)
 
     def __lt__(self, other: TimeValueNode) -> bool:
         return self.time_point < other.time_point
@@ -32,3 +36,6 @@ class TimeValueNode:
 
     def __ge__(self, other: TimeValueNode) -> bool:
         return self.time_point >= other.time_point
+
+    def _add_intervals(self, intervals: Iterable[Interval]) -> None:
+        self.__intervals.extend(intervals)

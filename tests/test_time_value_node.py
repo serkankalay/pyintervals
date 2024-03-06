@@ -1,21 +1,61 @@
 from datetime import datetime
+from typing import Iterable
 
 import pytest
 
+from pyintervals import Interval
 from pyintervals.time_value_node import TimeValueNode
+
+
+def _tvn_with_intervals(
+    tvn: TimeValueNode, intervals: Iterable[Interval]
+) -> TimeValueNode:
+    tvn._add_intervals(intervals)
+    return tvn
 
 
 @pytest.mark.parametrize(
     "tvn, other, is_equal",
     [
         (
-            TimeValueNode(datetime(1973, 1, 1)),
-            TimeValueNode(datetime(1973, 1, 1)),
+            _tvn_with_intervals(
+                TimeValueNode(
+                    time_point=datetime(1973, 1, 1),
+                ),
+                intervals=[
+                    Interval(datetime(1970, 1, 1), datetime(1977, 1, 1)),
+                ],
+            ),
+            _tvn_with_intervals(
+                TimeValueNode(
+                    time_point=datetime(1973, 1, 1),
+                ),
+                intervals=[
+                    Interval(datetime(1970, 1, 1), datetime(1977, 1, 1)),
+                ],
+            ),
             True,
         ),
         (
-            TimeValueNode(datetime(1973, 1, 1)),
-            TimeValueNode(datetime(1974, 1, 1)),
+            _tvn_with_intervals(
+                TimeValueNode(
+                    time_point=datetime(1973, 1, 1),
+                ),
+                intervals=[],
+            ),
+            _tvn_with_intervals(
+                TimeValueNode(
+                    time_point=datetime(1973, 1, 1),
+                ),
+                intervals=[
+                    Interval(datetime(1971, 1, 1), datetime(1977, 1, 1)),
+                ],
+            ),
+            False,
+        ),
+        (
+            TimeValueNode(time_point=datetime(1973, 1, 1)),
+            TimeValueNode(time_point=datetime(1974, 1, 1)),
             False,
         ),
     ],
