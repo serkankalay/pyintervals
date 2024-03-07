@@ -13,7 +13,8 @@ from pyintervals.time_value_node import TimeValueNode
 def _tvn_with_intervals(
     tvn: TimeValueNode, intervals: Iterable[Interval]
 ) -> TimeValueNode:
-    tvn._add_intervals(intervals)
+    for interval in intervals:
+        tvn._add_interval(interval)
     return tvn
 
 

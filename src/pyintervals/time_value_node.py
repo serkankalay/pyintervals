@@ -47,8 +47,8 @@ class TimeValueNode:
             raise NotImplementedError
         return self.time_point >= other.time_point
 
-    def _add_intervals(self, intervals: Iterable[Interval]) -> None:
-        self.__intervals.extend(intervals)
+    def _add_interval(self, interval: Interval) -> None:
+        self.__intervals.append(interval)
 
     @staticmethod
     def clone(

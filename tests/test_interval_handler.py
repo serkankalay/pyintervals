@@ -132,10 +132,12 @@ def test_remove_intervals(
         # Normal, starting earlier
         # Note, we have an earlier default node (as IntervalHandler will have)
         (
-            SortedList([
-                TimeValueNode(datetime(1970, 1, 1)),
-                TimeValueNode(datetime(2070, 1, 1)),
-            ]),
+            SortedList(
+                [
+                    TimeValueNode(datetime(1970, 1, 1)),
+                    TimeValueNode(datetime(2070, 1, 1)),
+                ]
+            ),
             Interval(datetime(2060, 1, 1), datetime(2065, 1, 1)),
         ),
         # Normal, starting earlier, ending-exactly the same time
@@ -153,9 +155,7 @@ def test_remove_intervals(
         ),
     ],
 )
-def test_make_range(
-    nodes: SortedList, new_interval: Interval
-) -> None:
+def test_make_range(nodes: SortedList, new_interval: Interval) -> None:
     _make_range(nodes, new_interval)
     assert {new_interval.start, new_interval.end}.issubset(
         {n.time_point for n in nodes}

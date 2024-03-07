@@ -29,9 +29,7 @@ def _to_new_node(
     )
 
 
-def _make_range(
-    nodes: SortedList, new_interval: Interval
-) -> None:
+def _make_range(nodes: SortedList, new_interval: Interval) -> None:
     for t in {new_interval.start, new_interval.end}:
         if new_node := _to_new_node(
             active_node=weak_predecessor(nodes, TimeValueNode(t)),
@@ -61,7 +59,14 @@ class IntervalHandler:
 
     def add(self, intervals: Iterable[Interval]) -> None:
         self.__intervals.extend(intervals)
-        # TODO: make range and insert interval to the relevant nodes.
+        for interval in intervals:
+            _make_range(self.__projection_graph, interval)
+            for node in self.__projection_graph.irange(
+                TimeValueNode(interval.start),
+                TimeValueNode(interval.end),
+                inclusive=(True, False),
+            ):
+                node._add_interval(interval)
 
     def remove(self, intervals: Collection[Interval]) -> None:
         self.__intervals = [i for i in self.__intervals if i not in intervals]
