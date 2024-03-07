@@ -31,7 +31,7 @@ mypy:
 
 .PHONY: test
 test:
-	pytest --cov=pyintervals
+	pytest --cov=pyintervals --cov-fail-under=95
 
 .PHONY: docs
 docs:
