@@ -30,14 +30,14 @@ def _to_new_node(
 
 
 def _make_range(
-    nodes: MutableSequence[TimeValueNode], new_interval: Interval
+    nodes: SortedList, new_interval: Interval
 ) -> None:
     for t in {new_interval.start, new_interval.end}:
         if new_node := _to_new_node(
             active_node=weak_predecessor(nodes, TimeValueNode(t)),
             time_point=t,
         ):
-            bisect.insort(nodes, new_node)
+            nodes.add(new_node)
 
 
 @dataclass

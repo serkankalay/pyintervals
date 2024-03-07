@@ -5,6 +5,7 @@ from typing import Iterable, Sequence
 
 import pytest
 from _pytest.fixtures import FixtureRequest
+from sortedcontainers import SortedList
 
 from pyintervals import Interval
 from pyintervals.interval_handler import (
@@ -115,46 +116,45 @@ def test_remove_intervals(
     [
         # Degenerate same-time
         (
-            [TimeValueNode(datetime(2070, 1, 1))],
+            SortedList([TimeValueNode(datetime(2070, 1, 1))]),
             Interval(datetime(2070, 1, 1), datetime(2070, 1, 1)),
         ),
         # Normal, starting same-time
         (
-            [TimeValueNode(datetime(2070, 1, 1))],
+            SortedList([TimeValueNode(datetime(2070, 1, 1))]),
             Interval(datetime(2070, 1, 1), datetime(2075, 1, 1)),
         ),
         # Normal, starting later
         (
-            [TimeValueNode(datetime(2070, 1, 1))],
+            SortedList([TimeValueNode(datetime(2070, 1, 1))]),
             Interval(datetime(2075, 1, 1), datetime(2076, 1, 1)),
         ),
         # Normal, starting earlier
         # Note, we have an earlier default node (as IntervalHandler will have)
         (
-            [
+            SortedList([
                 TimeValueNode(datetime(1970, 1, 1)),
                 TimeValueNode(datetime(2070, 1, 1)),
-            ],
+            ]),
             Interval(datetime(2060, 1, 1), datetime(2065, 1, 1)),
         ),
         # Normal, starting earlier, ending-exactly the same time
         # Note, we have an earlier default node (as IntervalHandler will have)
         (
-            [
-                TimeValueNode(datetime(2070, 1, 1)),
-            ],
+            SortedList(
+                [TimeValueNode(datetime(2070, 1, 1))],
+            ),
             Interval(datetime(2060, 1, 1), datetime(2070, 1, 1)),
         ),
         # Empty node graph
-        # Note, we have an earlier default node (as IntervalHandler will have)
         (
-            [],
+            SortedList([]),
             Interval(datetime(2060, 1, 1), datetime(2070, 1, 1)),
         ),
     ],
 )
 def test_make_range(
-    nodes: list[TimeValueNode], new_interval: Interval
+    nodes: SortedList, new_interval: Interval
 ) -> None:
     _make_range(nodes, new_interval)
     assert {new_interval.start, new_interval.end}.issubset(

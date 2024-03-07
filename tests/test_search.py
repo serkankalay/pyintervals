@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+from sortedcontainers import SortedList
 
 from pyintervals.search import weak_predecessor
 
@@ -18,4 +19,4 @@ from pyintervals.search import weak_predecessor
     ],
 )
 def test_weak_predecessor(sequence, point, expected) -> None:
-    assert weak_predecessor(sequence, point) == expected
+    assert weak_predecessor(SortedList(sequence), point) == expected
