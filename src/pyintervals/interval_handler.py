@@ -64,7 +64,7 @@ class IntervalHandler:
             for node in self.__projection_graph.irange(
                 TimeValueNode(interval.start),
                 TimeValueNode(interval.end),
-                inclusive=(True, False),
+                inclusive=(True, True if interval.is_degenerate() else False),
             ):
                 node._add_interval(interval)
 

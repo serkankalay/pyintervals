@@ -8,6 +8,7 @@ from _pytest.fixtures import FixtureRequest
 from sortedcontainers import SortedList
 
 from pyintervals import Interval
+from pyintervals.interval import contains_point
 from pyintervals.interval_handler import (
     _TIME_ZERO,
     IntervalHandler,
@@ -196,7 +197,7 @@ def test_interval_handler_with_intervals(
     )
     for interval in intervals:
         for node in handler.projection_graph():
-            if interval.start <= node.time_point < interval.end:
+            if contains_point(interval, node.time_point):
                 assert interval in node.intervals
 
 
