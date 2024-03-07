@@ -194,6 +194,10 @@ def test_interval_handler_with_intervals(
         set(tvn.time_point for tvn in handler.projection_graph())
         == expected_tvn_time_points
     )
+    for interval in intervals:
+        for node in handler.projection_graph():
+            if interval.start <= node.time_point < interval.end:
+                assert interval in node.intervals
 
 
 @pytest.fixture
