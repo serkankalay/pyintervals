@@ -21,27 +21,27 @@ from pyintervals.time_value_node import TimeValueNode
     "intervals,n_expected_intervals,n_expected_tvn,expected_tvn_time_points",
     [
         # Empty IH
-        ([], 0, 1, {_TIME_ZERO}),
+        ([], 0, 1, [_TIME_ZERO]),
         # IH with 1 normal interval
         (
             [Interval(datetime(2023, 10, 6), datetime(2024, 2, 29))],
             1,
             3,
-            {
+            [
                 _TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2024, 2, 29),
-            },
+            ],
         ),
         # IH with 1 degenerate interval
         (
             [Interval(datetime(2023, 10, 6), datetime(2023, 10, 6))],
             1,
             2,
-            {
+            [
                 _TIME_ZERO,
                 datetime(2023, 10, 6),
-            },
+            ],
         ),
         # IH with 1 normal and 1 degenerate interval, irrelevant
         (
@@ -51,12 +51,12 @@ from pyintervals.time_value_node import TimeValueNode
             ],
             2,
             4,
-            {
+            [
                 _TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2023, 10, 8),
                 datetime(2023, 10, 16),
-            },
+            ],
         ),
         # IH with 2 normal irrelevant and 1 degenerate interval, irrelevant
         (
@@ -67,14 +67,14 @@ from pyintervals.time_value_node import TimeValueNode
             ],
             3,
             6,
-            {
+            [
                 _TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2023, 10, 7),
                 datetime(2023, 10, 8),
                 datetime(2023, 10, 16),
                 datetime(2023, 10, 18),
-            },
+            ],
         ),
         # IH with 2 normal overlapping intervals
         (
@@ -84,13 +84,13 @@ from pyintervals.time_value_node import TimeValueNode
             ],
             2,
             5,
-            {
+            [
                 _TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2023, 10, 8),
                 datetime(2023, 10, 10),
                 datetime(2023, 10, 16),
-            },
+            ],
         ),
         # IH with 2 end-to-end intervals
         (
@@ -100,12 +100,12 @@ from pyintervals.time_value_node import TimeValueNode
             ],
             2,
             4,
-            {
+            [
                 _TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2023, 10, 10),
                 datetime(2023, 10, 16),
-            },
+            ],
         ),
         # IH with 2 exactly same intervals
         (
@@ -115,11 +115,11 @@ from pyintervals.time_value_node import TimeValueNode
             ],
             2,
             3,
-            {
+            [
                 _TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2023, 10, 10),
-            },
+            ],
         ),
         # IH with 2 intervals, one containing the other
         (
@@ -129,13 +129,13 @@ from pyintervals.time_value_node import TimeValueNode
             ],
             2,
             5,
-            {
+            [
                 _TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2023, 10, 8),
                 datetime(2023, 10, 9),
                 datetime(2023, 10, 10),
-            },
+            ],
         ),
         # IH with 2 intervals, one normal, one degenerate within the normal
         (
@@ -145,12 +145,12 @@ from pyintervals.time_value_node import TimeValueNode
             ],
             2,
             4,
-            {
+            [
                 _TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2023, 10, 8),
                 datetime(2023, 10, 10),
-            },
+            ],
         ),
         # IH with 2 intervals, one normal, one degenerate same start
         (
@@ -160,11 +160,11 @@ from pyintervals.time_value_node import TimeValueNode
             ],
             2,
             3,
-            {
+            [
                 _TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2023, 10, 10),
-            },
+            ],
         ),
         # IH with 2 intervals, one normal, one degenerate same end
         (
@@ -174,11 +174,11 @@ from pyintervals.time_value_node import TimeValueNode
             ],
             2,
             3,
-            {
+            [
                 _TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2023, 10, 10),
-            },
+            ],
         ),
     ],
 )
@@ -186,15 +186,14 @@ def test_interval_handler_with_intervals(
     intervals: Iterable[Interval],
     n_expected_intervals: int,
     n_expected_tvn: int,
-    expected_tvn_time_points: set[datetime],
+    expected_tvn_time_points: list[datetime],
 ) -> None:
     handler = IntervalHandler(intervals=intervals)
     assert len(handler.intervals) == n_expected_intervals
     assert len(handler.projection_graph()) == n_expected_tvn
-    assert (
-        set(tvn.time_point for tvn in handler.projection_graph())
-        == expected_tvn_time_points
-    )
+    assert [
+        tvn.time_point for tvn in handler.projection_graph()
+    ] == expected_tvn_time_points
     for interval in intervals:
         for node in handler.projection_graph():
             if contains_point(interval, node.time_point):
