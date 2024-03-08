@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 from datetime import datetime
+from functools import partial
 from typing import Iterable
 
 import pytest
@@ -16,6 +17,12 @@ def _tvn_with_intervals(
     for interval in intervals:
         tvn._add_interval(interval)
     return tvn
+
+
+def _to_tvn(
+    intervals: Iterable[Interval],
+) -> TimeValueNode:
+    return _tvn_with_intervals(TimeValueNode(datetime(2014, 9, 12)), intervals)
 
 
 @pytest.mark.parametrize(
@@ -159,3 +166,82 @@ def test_clone_time_value_node(
         else dataclasses.replace(tvn, time_point=to_time)
     )
     assert to_compare == TimeValueNode.clone(tvn, to_time)
+
+
+_normal_interval_with_value = partial(
+    Interval,
+    start=datetime(2017, 5, 20),
+    end=datetime(2023, 10, 6),
+)
+
+_degenerate_interval_with_value = partial(
+    Interval,
+    start=datetime(2014, 9, 12),
+    end=datetime(2014, 9, 12),
+)
+
+
+@pytest.mark.parametrize(
+    "intervals, expected_value",
+    [
+        # Empty,
+        ([], 0),
+        # Single interval with 0 value
+        (
+            [_normal_interval_with_value(value=0)],
+            0,
+        ),
+        # Single interval with postive value
+        (
+            [_normal_interval_with_value(value=5)],
+            5,
+        ),
+        # Two intervals with 0 value
+        (
+            [
+                _normal_interval_with_value(value=0),
+                _normal_interval_with_value(value=0),
+            ],
+            0,
+        ),
+        # Two intervals with positive value
+        (
+            [
+                _normal_interval_with_value(value=2.5),
+                _normal_interval_with_value(value=5),
+            ],
+            7.5,
+        ),
+        # Degenerate with 0
+        (
+            [_degenerate_interval_with_value(value=0)],
+            0,
+        ),
+        # Degenerate with positive value
+        (
+            [_degenerate_interval_with_value(value=5)],
+            0,
+        ),
+        # Two degenerate with positive value
+        (
+            [
+                _degenerate_interval_with_value(value=5),
+                _degenerate_interval_with_value(value=7),
+            ],
+            0,
+        ),
+        # Combination
+        (
+            [
+                _normal_interval_with_value(value=3.5),
+                _degenerate_interval_with_value(value=7),
+            ],
+            3.5,
+        ),
+    ],
+)
+def test_time_value_node_value(
+    intervals,
+    expected_value: float,
+) -> None:
+    assert _to_tvn(intervals).value == expected_value
