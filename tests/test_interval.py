@@ -14,6 +14,7 @@ def regular_interval() -> Interval:
     return Interval(
         start=THE_DATE,
         end=FUTURE_DATE,
+        value=1,
     )
 
 
@@ -35,6 +36,7 @@ def test_invalid_interval():
 
 def test_valid_interval(regular_interval):
     assert regular_interval
+    assert regular_interval.value == 1
 
 
 def test_degenerate_interval(degenerate_interval, regular_interval):
