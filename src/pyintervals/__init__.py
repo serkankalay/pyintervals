@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from .interval import Interval, contains, overlaps
+from .interval_handler import IntervalHandler
 
 __version__ = __import__("importlib.metadata").metadata.version(__name__)
 
@@ -9,4 +10,5 @@ __all__ = [
     "Interval",
     "overlaps",
     "contains",
+    "IntervalHandler",
 ]

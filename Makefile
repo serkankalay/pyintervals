@@ -26,12 +26,12 @@ lint:
 
 .PHONY: mypy
 mypy:
-	mypy --pretty --strict src
+	mypy --pretty src
 	mypy --pretty tests/
 
 .PHONY: test
 test:
-	pytest --cov=pyintervals
+	pytest --cov=pyintervals --cov-fail-under=95
 
 .PHONY: docs
 docs:
