@@ -303,3 +303,90 @@ def test_make_range(nodes: SortedList, new_interval: Interval) -> None:
     assert {new_interval.start, new_interval.end}.issubset(
         {n.time_point for n in nodes}
     )
+
+
+def _complex_interval_handler() -> IntervalHandler:
+    return IntervalHandler(
+        intervals=[
+            Interval(
+                start=datetime(2023, 1, 1),
+                end=datetime(2023, 1, 15, 17, 0),
+                value=1,
+            ),
+            Interval(
+                start=datetime(2023, 1, 19, 5, 0),
+                end=datetime(2023, 1, 21, 23, 0),
+                value=2,
+            ),
+            Interval(
+                start=datetime(2023, 1, 20, 5, 0),
+                end=datetime(2023, 1, 20, 5, 0),
+                value=1000,
+            ),
+            Interval(
+                start=datetime(2023, 1, 20, 5, 0),
+                end=datetime(2023, 1, 25, 5, 0),
+                value=5,
+            ),
+            Interval(
+                start=datetime(2023, 1, 25, 5, 0),
+                end=datetime(2023, 1, 25, 5, 0),
+                value=9,
+            ),
+            Interval(
+                start=datetime(2023, 2, 1),
+                end=datetime(2023, 2, 1),
+                value=9,
+            ),
+            Interval(
+                start=datetime(2023, 2, 1),
+                end=datetime(2023, 3, 1),
+                value=3,
+            ),
+            Interval(
+                start=datetime(2023, 2, 15),
+                end=datetime(2023, 2, 15),
+                value=2,
+            ),
+        ]
+    )
+
+
+@pytest.mark.parametrize(
+    "time_point, n_expected_intervals, expected_value",
+    [
+        # Before first interval
+        (datetime(2020, 1, 1), 0, 0),
+        # At first interval
+        (datetime(2023, 1, 1), 1, 1),
+        # During first interval
+        (datetime(2023, 1, 10), 1, 1),
+        # End of first interval
+        (datetime(2023, 1, 15, 17), 0, 0),
+        # Right before first degenerate
+        (datetime(2023, 1, 20, 4, 59), 1, 2),
+        # At first degenerate
+        (datetime(2023, 1, 20, 5, 0), 3, 7),
+        # First time only 2 normal intervals exist
+        (datetime(2023, 1, 21, 5, 0), 3, 7),
+        # One of the intervals ended
+        (datetime(2023, 1, 23, 19, 0), 1, 5),
+        # Normal ended but 1 degenerate is there
+        (datetime(2023, 1, 25, 5, 0), 1, 0),
+        # Nothing is there
+        (datetime(2023, 1, 29, 5, 0), 1, 0),
+        # Next group starting, no impact degenerate
+        (datetime(2023, 2, 1), 2, 3),
+        (datetime(2023, 2, 15), 2, 3),
+        # End of story
+        (datetime(2023, 3, 1), 0, 0),
+    ],
+)
+def test_value_at_time(
+    time_point, n_expected_intervals, expected_value
+) -> None:
+    handler = _complex_interval_handler()
+    assert (
+        len(handler.node_at_time(time_point).intervals) == n_expected_intervals
+    )
+    # assert handler.value_at_time(time_point) == expected_value

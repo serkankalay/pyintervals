@@ -29,10 +29,14 @@ def _to_new_node(
     )
 
 
+def _active_node_at_time(nodes: SortedList, when: datetime) -> TimeValueNode:
+    return weak_predecessor(nodes, TimeValueNode(when))
+
+
 def _make_range(nodes: SortedList, new_interval: Interval) -> None:
     for t in {new_interval.start, new_interval.end}:
         if new_node := _to_new_node(
-            active_node=weak_predecessor(nodes, TimeValueNode(t)),
+            active_node=_active_node_at_time(nodes, t),
             time_point=t,
         ):
             nodes.add(new_node)
@@ -70,6 +74,10 @@ class IntervalHandler:
 
     def remove(self, intervals: Collection[Interval]) -> None:
         self.__intervals = [i for i in self.__intervals if i not in intervals]
+        # TODO: manage interval handler logic as well.
 
     def projection_graph(self) -> Sequence[TimeValueNode]:
         return list(self.__projection_graph)
+
+    def node_at_time(self, when: datetime) -> TimeValueNode:
+        return _active_node_at_time(self.__projection_graph, when)
