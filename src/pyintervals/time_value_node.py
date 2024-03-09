@@ -2,9 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from functools import partial
 from itertools import filterfalse
-from typing import Iterable
 
 from pyintervals import Interval
 
@@ -61,7 +59,15 @@ class TimeValueNode:
         given: TimeValueNode, to_time: datetime | None = None
     ) -> TimeValueNode:
         return (
-            TimeValueNode(given.time_point, given.__intervals)
+            TimeValueNode(given.time_point, list(given.__intervals))
             if not to_time
-            else TimeValueNode(to_time, given.__intervals)
+            else TimeValueNode(
+                to_time,
+                list(
+                    filterfalse(
+                        lambda x: x.is_degenerate(),
+                        given.__intervals,
+                    )
+                ),
+            )
         )

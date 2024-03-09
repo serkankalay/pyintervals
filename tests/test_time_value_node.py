@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import dataclasses
 from datetime import datetime
 from functools import partial
 from typing import Iterable
@@ -145,6 +144,16 @@ def test_time_value_node_comparison(
             ),
             None,
         ),
+        # With degenerate intervals
+        (
+            _tvn_with_intervals(
+                TimeValueNode(datetime(1975, 1, 1)),
+                intervals=[
+                    Interval(datetime(1975, 1, 1), datetime(1975, 1, 1))
+                ],
+            ),
+            None,
+        ),
         # With intervals and time
         (
             _tvn_with_intervals(
@@ -155,6 +164,16 @@ def test_time_value_node_comparison(
             ),
             datetime(2014, 9, 12),
         ),
+        # With degenerate intervals and time
+        (
+            _tvn_with_intervals(
+                TimeValueNode(datetime(1975, 1, 1)),
+                intervals=[
+                    Interval(datetime(1975, 1, 1), datetime(1975, 1, 1))
+                ],
+            ),
+            datetime(1976, 1, 1),
+        ),
     ],
 )
 def test_clone_time_value_node(
@@ -163,7 +182,10 @@ def test_clone_time_value_node(
     to_compare = (
         tvn
         if to_time is None
-        else dataclasses.replace(tvn, time_point=to_time)
+        else _tvn_with_intervals(
+            TimeValueNode(to_time),
+            [t for t in tvn.intervals if not t.is_degenerate()],
+        )
     )
     assert to_compare == TimeValueNode.clone(tvn, to_time)
 
