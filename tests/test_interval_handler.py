@@ -389,4 +389,4 @@ def test_value_at_time(
     assert (
         len(handler.node_at_time(time_point).intervals) == n_expected_intervals
     )
-    # assert handler.value_at_time(time_point) == expected_value
+    assert handler.value_at_time(time_point) == expected_value
