@@ -305,51 +305,53 @@ def test_make_range(nodes: SortedList, new_interval: Interval) -> None:
     )
 
 
+def _complex_intervals() -> list[Interval]:
+    return [
+        Interval(
+            start=datetime(2023, 1, 1),
+            end=datetime(2023, 1, 15, 17, 0),
+            value=1,
+        ),
+        Interval(
+            start=datetime(2023, 1, 19, 5, 0),
+            end=datetime(2023, 1, 21, 23, 0),
+            value=2,
+        ),
+        Interval(
+            start=datetime(2023, 1, 20, 5, 0),
+            end=datetime(2023, 1, 20, 5, 0),
+            value=1000,
+        ),
+        Interval(
+            start=datetime(2023, 1, 20, 5, 0),
+            end=datetime(2023, 1, 25, 5, 0),
+            value=5,
+        ),
+        Interval(
+            start=datetime(2023, 1, 25, 5, 0),
+            end=datetime(2023, 1, 25, 5, 0),
+            value=9,
+        ),
+        Interval(
+            start=datetime(2023, 2, 1),
+            end=datetime(2023, 2, 1),
+            value=9,
+        ),
+        Interval(
+            start=datetime(2023, 2, 1),
+            end=datetime(2023, 3, 1),
+            value=3,
+        ),
+        Interval(
+            start=datetime(2023, 2, 15),
+            end=datetime(2023, 2, 15),
+            value=2,
+        ),
+    ]
+
+
 def _complex_interval_handler() -> IntervalHandler:
-    return IntervalHandler(
-        intervals=[
-            Interval(
-                start=datetime(2023, 1, 1),
-                end=datetime(2023, 1, 15, 17, 0),
-                value=1,
-            ),
-            Interval(
-                start=datetime(2023, 1, 19, 5, 0),
-                end=datetime(2023, 1, 21, 23, 0),
-                value=2,
-            ),
-            Interval(
-                start=datetime(2023, 1, 20, 5, 0),
-                end=datetime(2023, 1, 20, 5, 0),
-                value=1000,
-            ),
-            Interval(
-                start=datetime(2023, 1, 20, 5, 0),
-                end=datetime(2023, 1, 25, 5, 0),
-                value=5,
-            ),
-            Interval(
-                start=datetime(2023, 1, 25, 5, 0),
-                end=datetime(2023, 1, 25, 5, 0),
-                value=9,
-            ),
-            Interval(
-                start=datetime(2023, 2, 1),
-                end=datetime(2023, 2, 1),
-                value=9,
-            ),
-            Interval(
-                start=datetime(2023, 2, 1),
-                end=datetime(2023, 3, 1),
-                value=3,
-            ),
-            Interval(
-                start=datetime(2023, 2, 15),
-                end=datetime(2023, 2, 15),
-                value=2,
-            ),
-        ]
-    )
+    return IntervalHandler(intervals=_complex_intervals())
 
 
 @pytest.mark.parametrize(

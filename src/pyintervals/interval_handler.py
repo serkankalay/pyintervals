@@ -81,6 +81,6 @@ class IntervalHandler:
 
     def node_at_time(self, when: datetime) -> TimeValueNode:
         return _active_node_at_time(self.__projection_graph, when)
-    
+
     def value_at_time(self, when: datetime) -> float:
         return _active_node_at_time(self.__projection_graph, when).value
