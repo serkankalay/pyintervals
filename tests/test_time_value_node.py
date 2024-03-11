@@ -398,6 +398,16 @@ def test_time_value_node_value(
                         ]
                     ),
                 ),
+                TimeValueNode(
+                    datetime(2025, 1, 1),
+                    SortedList(
+                        [
+                            Interval(
+                                datetime(2025, 1, 1), datetime(2025, 1, 1)
+                            ),
+                        ]
+                    ),
+                ),
             ],
             [
                 TimeValueNode(
@@ -406,6 +416,16 @@ def test_time_value_node_value(
                         [
                             Interval(
                                 datetime(2024, 1, 1), datetime(2024, 1, 1)
+                            ),
+                        ]
+                    ),
+                ),
+                TimeValueNode(
+                    datetime(2025, 1, 1),
+                    SortedList(
+                        [
+                            Interval(
+                                datetime(2025, 1, 1), datetime(2025, 1, 1)
                             ),
                         ]
                     ),

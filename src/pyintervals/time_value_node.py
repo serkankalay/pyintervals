@@ -62,6 +62,9 @@ class TimeValueNode:
     def _add_interval(self, interval: Interval) -> None:
         self.__intervals.add(interval)
 
+    def _remove_interval(self, interval: Interval) -> None:
+        self.__intervals.remove(interval)
+
     @staticmethod
     def clone(
         given: TimeValueNode, to_time: datetime | None = None
@@ -86,14 +89,18 @@ def _simplify(nodes: Sequence[TimeValueNode]) -> list[TimeValueNode]:
 
     while len(search_batch) > 1:
         remaining, redundant = [], []
-        for first, second in batched(
+        for pair in batched(
             sorted(filter(lambda n: not n.is_redundant(), search_batch)), 2
         ):
-            if first == second:
-                remaining.append(first)
-                redundant.append(second)
+            if len(pair) > 1:
+                first, second = pair[0], pair[1]
+                if first == second:
+                    remaining.append(first)
+                    redundant.append(second)
+                else:
+                    remaining.extend([first, second])
             else:
-                remaining.extend([first, second])
+                remaining.append(pair[0])
 
         search_batch = remaining
 

@@ -396,9 +396,9 @@ def test_node_and_value_at_time(
     [
         ([_complex_intervals()[0]], 2),
         (_complex_intervals(), len(_complex_intervals())),
-        (_complex_intervals()[2], 0),
-        (_complex_intervals()[4], 0),
-        (_complex_intervals()[7], 1),
+        ([_complex_intervals()[2]], 0),
+        ([_complex_intervals()[4]], 0),
+        ([_complex_intervals()[7]], 1),
     ],
 )
 def test_remove_intervals_detailed(
