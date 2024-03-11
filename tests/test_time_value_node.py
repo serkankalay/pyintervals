@@ -5,9 +5,11 @@ from functools import partial
 from typing import Iterable
 
 import pytest
+from sortedcontainers import SortedList
 
 from pyintervals import Interval
-from pyintervals.time_value_node import TimeValueNode
+from pyintervals.constants import TIME_ZERO
+from pyintervals.time_value_node import TimeValueNode, _simplify
 
 
 def _tvn_with_intervals(
@@ -41,6 +43,27 @@ def _to_tvn(
                     time_point=datetime(1973, 1, 1),
                 ),
                 intervals=[
+                    Interval(datetime(1970, 1, 1), datetime(1977, 1, 1)),
+                ],
+            ),
+            True,
+        ),
+        (
+            _tvn_with_intervals(
+                TimeValueNode(
+                    time_point=datetime(1973, 1, 1),
+                ),
+                intervals=[
+                    Interval(datetime(1970, 1, 1), datetime(1977, 1, 1)),
+                    Interval(datetime(1975, 1, 1), datetime(1977, 1, 1)),
+                ],
+            ),
+            _tvn_with_intervals(
+                TimeValueNode(
+                    time_point=datetime(1973, 1, 1),
+                ),
+                intervals=[
+                    Interval(datetime(1975, 1, 1), datetime(1977, 1, 1)),
                     Interval(datetime(1970, 1, 1), datetime(1977, 1, 1)),
                 ],
             ),
@@ -267,3 +290,207 @@ def test_time_value_node_value(
     expected_value: float,
 ) -> None:
     assert _to_tvn(intervals).value == expected_value
+
+
+@pytest.mark.parametrize(
+    "nodes, answer",
+    [
+        # Empty,
+        ([], []),
+        # Should not touch the dummy one
+        ([TimeValueNode(TIME_ZERO)], [TimeValueNode(TIME_ZERO)]),
+        # Remove redundant
+        (
+            [TimeValueNode(datetime(2024, 1, 1))],
+            [],
+        ),
+        # Remove similar
+        (
+            [
+                TimeValueNode(
+                    datetime(2024, 1, 1),
+                    SortedList(
+                        [Interval(datetime(2024, 1, 1), datetime(2024, 2, 1))]
+                    ),
+                ),
+                TimeValueNode(
+                    datetime(2024, 1, 1),
+                    SortedList(
+                        [Interval(datetime(2024, 1, 1), datetime(2024, 2, 1))]
+                    ),
+                ),
+            ],
+            [
+                TimeValueNode(
+                    datetime(2024, 1, 1),
+                    SortedList(
+                        [Interval(datetime(2024, 1, 1), datetime(2024, 2, 1))]
+                    ),
+                )
+            ],
+        ),
+        # Remove similar
+        (
+            [
+                TimeValueNode(
+                    datetime(2024, 1, 1),
+                    SortedList(
+                        [
+                            Interval(
+                                datetime(2024, 1, 1), datetime(2024, 1, 1)
+                            ),
+                            Interval(
+                                datetime(2024, 1, 1), datetime(2024, 2, 1)
+                            ),
+                        ]
+                    ),
+                ),
+                TimeValueNode(
+                    datetime(2024, 1, 1),
+                    SortedList(
+                        [
+                            Interval(
+                                datetime(2024, 1, 1), datetime(2024, 1, 1)
+                            ),
+                            Interval(
+                                datetime(2024, 1, 1), datetime(2024, 2, 1)
+                            ),
+                        ]
+                    ),
+                ),
+            ],
+            [
+                TimeValueNode(
+                    datetime(2024, 1, 1),
+                    SortedList(
+                        [
+                            Interval(
+                                datetime(2024, 1, 1), datetime(2024, 1, 1)
+                            ),
+                            Interval(
+                                datetime(2024, 1, 1), datetime(2024, 2, 1)
+                            ),
+                        ]
+                    ),
+                ),
+            ],
+        ),
+        # Remove similar
+        (
+            [
+                TimeValueNode(
+                    datetime(2024, 1, 1),
+                    SortedList(
+                        [
+                            Interval(
+                                datetime(2024, 1, 1), datetime(2024, 1, 1)
+                            ),
+                        ]
+                    ),
+                ),
+                TimeValueNode(
+                    datetime(2024, 1, 1),
+                    SortedList(
+                        [
+                            Interval(
+                                datetime(2024, 1, 1), datetime(2024, 1, 1)
+                            ),
+                        ]
+                    ),
+                ),
+            ],
+            [
+                TimeValueNode(
+                    datetime(2024, 1, 1),
+                    SortedList(
+                        [
+                            Interval(
+                                datetime(2024, 1, 1), datetime(2024, 1, 1)
+                            ),
+                        ]
+                    ),
+                ),
+            ],
+        ),
+        # Remove similar - not in same order
+        (
+            [
+                TimeValueNode(
+                    datetime(2024, 1, 1),
+                    SortedList(
+                        [
+                            Interval(
+                                datetime(2024, 1, 1), datetime(2024, 2, 1)
+                            ),
+                            Interval(
+                                datetime(2024, 2, 1), datetime(2024, 3, 1)
+                            ),
+                        ]
+                    ),
+                ),
+                TimeValueNode(
+                    datetime(2024, 1, 1),
+                    SortedList(
+                        [
+                            Interval(
+                                datetime(2024, 2, 1), datetime(2024, 3, 1)
+                            ),
+                            Interval(
+                                datetime(2024, 1, 1), datetime(2024, 2, 1)
+                            ),
+                        ]
+                    ),
+                ),
+            ],
+            [
+                TimeValueNode(
+                    datetime(2024, 1, 1),
+                    SortedList(
+                        [
+                            Interval(
+                                datetime(2024, 1, 1), datetime(2024, 2, 1)
+                            ),
+                            Interval(
+                                datetime(2024, 2, 1), datetime(2024, 3, 1)
+                            ),
+                        ]
+                    ),
+                ),
+            ],
+        ),
+    ],
+)
+def test_simplify_graph(nodes, answer):
+    assert _simplify(nodes) == answer
+
+
+@pytest.mark.parametrize(
+    "node, answer",
+    [
+        (TimeValueNode(TIME_ZERO), False),
+        (
+            TimeValueNode(
+                TIME_ZERO,
+                SortedList(
+                    [Interval(datetime(2024, 1, 1), datetime(2024, 1, 1))]
+                ),
+            ),
+            False,
+        ),
+        (TimeValueNode(datetime(2024, 1, 1)), True),
+        (
+            TimeValueNode(
+                datetime(2024, 1, 1),
+                SortedList(
+                    [
+                        Interval(datetime(2024, 1, 1), datetime(2024, 1, 1)),
+                        Interval(datetime(2024, 1, 1), datetime(2024, 2, 1)),
+                    ]
+                ),
+            ),
+            False,
+        ),
+    ],
+)
+def test_is_redundant(node, answer):
+    assert node.is_redundant() == answer

@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class Interval:
     start: datetime
     end: datetime

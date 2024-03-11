@@ -1,18 +1,17 @@
 from __future__ import annotations
 
-import bisect
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Collection, Iterable, MutableSequence, Sequence
+from typing import Collection, Iterable, Sequence
 
 from sortedcontainers import SortedList
 
+from .constants import TIME_ZERO
 from .interval import Interval
 from .search import weak_predecessor
 from .time_value_node import TimeValueNode
 
 # Unix epoch
-_TIME_ZERO: datetime = datetime(1970, 1, 1)
 
 
 def _to_new_node(
@@ -54,7 +53,7 @@ class IntervalHandler:
     def _initialize(self) -> None:
         self.__intervals = list()
         self.__projection_graph = SortedList(
-            [TimeValueNode(time_point=_TIME_ZERO)]
+            [TimeValueNode(time_point=TIME_ZERO)]
         )
 
     @property

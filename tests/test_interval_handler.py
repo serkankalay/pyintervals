@@ -8,12 +8,9 @@ from _pytest.fixtures import FixtureRequest
 from sortedcontainers import SortedList
 
 from pyintervals import Interval
+from pyintervals.constants import TIME_ZERO
 from pyintervals.interval import contains_point
-from pyintervals.interval_handler import (
-    _TIME_ZERO,
-    IntervalHandler,
-    _make_range,
-)
+from pyintervals.interval_handler import IntervalHandler, _make_range
 from pyintervals.time_value_node import TimeValueNode
 
 
@@ -21,14 +18,14 @@ from pyintervals.time_value_node import TimeValueNode
     "intervals,n_expected_intervals,n_expected_tvn,expected_tvn_time_points",
     [
         # Empty IH
-        ([], 0, 1, [_TIME_ZERO]),
+        ([], 0, 1, [TIME_ZERO]),
         # IH with 1 normal interval
         (
             [Interval(datetime(2023, 10, 6), datetime(2024, 2, 29))],
             1,
             3,
             [
-                _TIME_ZERO,
+                TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2024, 2, 29),
             ],
@@ -39,7 +36,7 @@ from pyintervals.time_value_node import TimeValueNode
             1,
             2,
             [
-                _TIME_ZERO,
+                TIME_ZERO,
                 datetime(2023, 10, 6),
             ],
         ),
@@ -52,7 +49,7 @@ from pyintervals.time_value_node import TimeValueNode
             2,
             4,
             [
-                _TIME_ZERO,
+                TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2023, 10, 8),
                 datetime(2023, 10, 16),
@@ -68,7 +65,7 @@ from pyintervals.time_value_node import TimeValueNode
             3,
             6,
             [
-                _TIME_ZERO,
+                TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2023, 10, 7),
                 datetime(2023, 10, 8),
@@ -85,7 +82,7 @@ from pyintervals.time_value_node import TimeValueNode
             2,
             5,
             [
-                _TIME_ZERO,
+                TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2023, 10, 8),
                 datetime(2023, 10, 10),
@@ -101,7 +98,7 @@ from pyintervals.time_value_node import TimeValueNode
             2,
             4,
             [
-                _TIME_ZERO,
+                TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2023, 10, 10),
                 datetime(2023, 10, 16),
@@ -116,7 +113,7 @@ from pyintervals.time_value_node import TimeValueNode
             2,
             3,
             [
-                _TIME_ZERO,
+                TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2023, 10, 10),
             ],
@@ -130,7 +127,7 @@ from pyintervals.time_value_node import TimeValueNode
             2,
             5,
             [
-                _TIME_ZERO,
+                TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2023, 10, 8),
                 datetime(2023, 10, 9),
@@ -146,7 +143,7 @@ from pyintervals.time_value_node import TimeValueNode
             2,
             4,
             [
-                _TIME_ZERO,
+                TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2023, 10, 8),
                 datetime(2023, 10, 10),
@@ -161,7 +158,7 @@ from pyintervals.time_value_node import TimeValueNode
             2,
             3,
             [
-                _TIME_ZERO,
+                TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2023, 10, 10),
             ],
@@ -175,7 +172,7 @@ from pyintervals.time_value_node import TimeValueNode
             2,
             3,
             [
-                _TIME_ZERO,
+                TIME_ZERO,
                 datetime(2023, 10, 6),
                 datetime(2023, 10, 10),
             ],
@@ -384,7 +381,7 @@ def _complex_interval_handler() -> IntervalHandler:
         (datetime(2023, 3, 1), 0, 0),
     ],
 )
-def test_value_at_time(
+def test_node_and_value_at_time(
     time_point, n_expected_intervals, expected_value
 ) -> None:
     handler = _complex_interval_handler()
@@ -392,3 +389,29 @@ def test_value_at_time(
         len(handler.node_at_time(time_point).intervals) == n_expected_intervals
     )
     assert handler.value_at_time(time_point) == expected_value
+
+
+@pytest.mark.parametrize(
+    "intervals, n_expected_tvn_reduction",
+    [
+        ([_complex_intervals()[0]], 2),
+        (_complex_intervals(), len(_complex_intervals())),
+        (_complex_intervals()[2], 0),
+        (_complex_intervals()[4], 0),
+        (_complex_intervals()[7], 1),
+    ],
+)
+def test_remove_intervals_detailed(
+    intervals: list[Interval], n_expected_tvn_reduction
+) -> None:
+    handler = _complex_interval_handler()
+    original_tvn_count = len(handler.projection_graph())
+    handler.remove(intervals)
+    assert len(handler.projection_graph()) == (
+        original_tvn_count - n_expected_tvn_reduction
+    )
+    assert not any(
+        interval in node.intervals
+        for node in handler.projection_graph()
+        for interval in intervals
+    )
