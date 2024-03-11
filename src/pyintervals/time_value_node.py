@@ -85,16 +85,19 @@ class TimeValueNode:
 
 
 def _simplify(nodes: Sequence[TimeValueNode]) -> list[TimeValueNode]:
-    search_batch = list(filter(lambda n: not n.is_redundant(), nodes))
+    search_batch = list(nodes)
 
     while len(search_batch) > 1:
         remaining, redundant = [], []
-        for pair in batched(
-            sorted(filter(lambda n: not n.is_redundant(), search_batch)), 2
-        ):
+        for pair in batched(sorted(search_batch), 2):
             if len(pair) > 1:
                 first, second = pair[0], pair[1]
-                if first == second:
+                if (
+                    (first == second)
+                    or first.intervals == second.intervals
+                    or (not first.intervals and not second.intervals)
+                    # TODO: should be based on starting & ending intervals
+                ):
                     remaining.append(first)
                     redundant.append(second)
                 else:

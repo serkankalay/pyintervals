@@ -299,10 +299,28 @@ def test_time_value_node_value(
         ([], []),
         # Should not touch the dummy one
         ([TimeValueNode(TIME_ZERO)], [TimeValueNode(TIME_ZERO)]),
-        # Remove redundant
+        # No removal
         (
             [TimeValueNode(datetime(2024, 1, 1))],
-            [],
+            [TimeValueNode(datetime(2024, 1, 1))],
+        ),
+        # Remove redundant
+        (
+            [
+                TimeValueNode(datetime(2024, 1, 1)),
+                TimeValueNode(datetime(2025, 1, 1)),
+            ],
+            [TimeValueNode(datetime(2024, 1, 1))],
+        ),
+        # Remove redundant
+        (
+            [
+                TimeValueNode(TIME_ZERO),
+                TimeValueNode(datetime(2025, 1, 1)),
+            ],
+            [
+                TimeValueNode(TIME_ZERO),
+            ],
         ),
         # Remove similar
         (
@@ -482,35 +500,3 @@ def test_time_value_node_value(
 )
 def test_simplify_graph(nodes, answer):
     assert _simplify(nodes) == answer
-
-
-@pytest.mark.parametrize(
-    "node, answer",
-    [
-        (TimeValueNode(TIME_ZERO), False),
-        (
-            TimeValueNode(
-                TIME_ZERO,
-                SortedList(
-                    [Interval(datetime(2024, 1, 1), datetime(2024, 1, 1))]
-                ),
-            ),
-            False,
-        ),
-        (TimeValueNode(datetime(2024, 1, 1)), True),
-        (
-            TimeValueNode(
-                datetime(2024, 1, 1),
-                SortedList(
-                    [
-                        Interval(datetime(2024, 1, 1), datetime(2024, 1, 1)),
-                        Interval(datetime(2024, 1, 1), datetime(2024, 2, 1)),
-                    ]
-                ),
-            ),
-            False,
-        ),
-    ],
-)
-def test_is_redundant(node, answer):
-    assert node.is_redundant() == answer
