@@ -5,7 +5,6 @@ from datetime import datetime
 from itertools import filterfalse
 from typing import Sequence
 
-from more_itertools import batched
 from sortedcontainers import SortedList
 
 from pyintervals import Interval
@@ -17,7 +16,6 @@ from pyintervals.interval import contains_point
 class TimeValueNode:
     time_point: datetime
     __intervals: SortedList = field(default_factory=SortedList)
-    # TODO: implement management for these
     __starting_intervals: SortedList = field(default_factory=SortedList)
     __ending_intervals: SortedList = field(default_factory=SortedList)
 
@@ -38,7 +36,11 @@ class TimeValueNode:
         return sum(i.value for i in self.__intervals if not i.is_degenerate())
 
     def is_redundant(self) -> bool:
-        return self.time_point > TIME_ZERO and not self.__intervals
+        return (
+            self.time_point > TIME_ZERO
+            and not self.__starting_intervals
+            and not self.__ending_intervals
+        )
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, TimeValueNode):
@@ -110,29 +112,30 @@ class TimeValueNode:
 
 
 def _simplify(nodes: Sequence[TimeValueNode]) -> list[TimeValueNode]:
-    search_batch = list(nodes)
-
-    while len(search_batch) > 1:
-        remaining, redundant = [], []
-        for pair in batched(sorted(search_batch), 2):
-            if len(pair) > 1:
-                first, second = pair[0], pair[1]
-                if (
-                    (first == second)
-                    or first.intervals == second.intervals
-                    or (not first.intervals and not second.intervals)
-                    # TODO: should be based on starting & ending intervals
-                ):
-                    remaining.append(first)
-                    redundant.append(second)
-                else:
-                    remaining.extend([first, second])
-            else:
-                remaining.append(pair[0])
-
-        search_batch = remaining
-
-        if not redundant:
-            break
-
-    return search_batch
+    return list(filterfalse(lambda n: n.is_redundant(), nodes))
+    # search_batch = list(nodes)
+    #
+    # while len(search_batch) > 1:
+    #     remaining, redundant = [], []
+    #     for pair in batched(sorted(search_batch), 2):
+    #         if len(pair) > 1:
+    #             first, second = pair[0], pair[1]
+    #             if (
+    #                 (first == second)
+    #                 or first.intervals == second.intervals
+    #                 or (not first.intervals and not second.intervals)
+    #                 # TODO: should be based on starting & ending intervals
+    #             ):
+    #                 remaining.append(first)
+    #                 redundant.append(second)
+    #             else:
+    #                 remaining.extend([first, second])
+    #         else:
+    #             remaining.append(pair[0])
+    #
+    #     search_batch = remaining
+    #
+    #     if not redundant:
+    #         break
+    #
+    # return search_batch
