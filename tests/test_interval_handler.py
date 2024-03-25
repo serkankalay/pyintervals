@@ -214,8 +214,15 @@ def interval_handler_w_2_intervals() -> IntervalHandler:
         (
             "interval_handler_w_2_intervals",
             [
-                Interval(datetime(2023, 10, 6), datetime(2024, 2, 29)),
-                Interval(datetime(2025, 11, 4), datetime(2027, 2, 27)),
+                Interval(datetime(2023, 10, 7), datetime(2024, 5, 29)),
+                Interval(datetime(2025, 11, 5), datetime(2027, 7, 27)),
+            ],
+        ),
+        (
+            "interval_handler_w_2_intervals",
+            [
+                Interval(datetime(2023, 10, 7), datetime(2023, 10, 7)),
+                Interval(datetime(2025, 11, 5), datetime(2025, 11, 5)),
             ],
         ),
     ],
@@ -229,6 +236,11 @@ def test_add_intervals(
     prev_count = len(handler.intervals)
     handler.add(new_intervals)
     assert prev_count + len(new_intervals) == len(handler.intervals)
+    for interval in new_intervals:
+        assert (
+            interval in handler.node_at_time(interval.start).starting_intervals
+        )
+        assert interval in handler.node_at_time(interval.end).ending_intervals
 
 
 def test_remove_intervals(
@@ -245,6 +257,13 @@ def test_remove_intervals(
     to_remove = handler.intervals[0]
     handler.remove([to_remove])
     assert original_count - 1 == len(handler.intervals)
+    assert (
+        to_remove
+        not in handler.node_at_time(to_remove.start).starting_intervals
+    )
+    assert (
+        to_remove not in handler.node_at_time(to_remove.end).ending_intervals
+    )
 
     # Remove all
     handler.remove(handler.intervals)

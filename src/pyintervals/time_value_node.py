@@ -10,16 +10,28 @@ from sortedcontainers import SortedList
 
 from pyintervals import Interval
 from pyintervals.constants import TIME_ZERO
+from pyintervals.interval import contains_point
 
 
 @dataclass(frozen=True)
 class TimeValueNode:
     time_point: datetime
     __intervals: SortedList = field(default_factory=SortedList)
+    # TODO: implement management for these
+    __starting_intervals: SortedList = field(default_factory=SortedList)
+    __ending_intervals: SortedList = field(default_factory=SortedList)
 
     @property
     def intervals(self) -> list[Interval]:
         return list(self.__intervals)
+
+    @property
+    def starting_intervals(self) -> list[Interval]:
+        return list(self.__starting_intervals)
+
+    @property
+    def ending_intervals(self) -> list[Interval]:
+        return list(self.__ending_intervals)
 
     @property
     def value(self) -> float:
@@ -60,10 +72,23 @@ class TimeValueNode:
         return self.time_point >= other.time_point
 
     def _add_interval(self, interval: Interval) -> None:
-        self.__intervals.add(interval)
+        if interval.end == self.time_point:
+            self.__ending_intervals.add(interval)
+            if interval.is_degenerate():
+                self.__intervals.add(interval)
+        elif not interval.is_degenerate():
+            self.__intervals.add(interval)
+
+        if interval.start == self.time_point:
+            self.__starting_intervals.add(interval)
 
     def _remove_interval(self, interval: Interval) -> None:
-        self.__intervals.remove(interval)
+        if contains_point(interval, self.time_point):
+            self.__intervals.remove(interval)
+        if interval.start == self.time_point:
+            self.__starting_intervals.remove(interval)
+        if interval.end == self.time_point:
+            self.__ending_intervals.remove(interval)
 
     @staticmethod
     def clone(

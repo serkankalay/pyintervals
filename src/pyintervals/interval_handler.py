@@ -11,7 +11,6 @@ from .interval import Interval
 from .search import weak_predecessor
 from .time_value_node import TimeValueNode, _simplify
 
-
 # Unix epoch
 
 
@@ -50,7 +49,7 @@ def _relevant_nodes(
         nodes.irange(
             TimeValueNode(interval.start),
             TimeValueNode(interval.end),
-            inclusive=(True, True if interval.is_degenerate() else False),
+            inclusive=(True, True),
         )
     )
 
