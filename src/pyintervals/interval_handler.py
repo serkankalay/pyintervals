@@ -11,8 +11,6 @@ from .interval import Interval
 from .search import weak_predecessor
 from .time_value_node import TimeValueNode, _simplify
 
-# Unix epoch
-
 
 def _to_new_node(
     active_node: TimeValueNode | None,
