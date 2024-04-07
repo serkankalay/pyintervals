@@ -30,7 +30,10 @@ def _to_new_node(
 
 
 def _active_node_at_time(nodes: SortedList, when: datetime) -> TimeValueNode:
-    return weak_predecessor(nodes, TimeValueNode(when))
+    if node := weak_predecessor(nodes, TimeValueNode(when)):
+        return node
+    else:
+        raise RuntimeError("Could not find active node at time.")
 
 
 def _make_range(nodes: SortedList, new_interval: Interval) -> None:
