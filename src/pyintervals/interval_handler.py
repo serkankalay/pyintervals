@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import bisect
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Collection, Iterable, MutableSequence, Sequence
+from typing import Collection, Iterable, Sequence
 
 from sortedcontainers import SortedList
 
