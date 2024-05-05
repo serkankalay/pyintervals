@@ -3,14 +3,12 @@ from __future__ import annotations
 import bisect
 from typing import Sequence, TypeVar
 
-from sortedcontainers import SortedList
+from _typeshed import SupportsRichComparison
 
-T = TypeVar("T")
+T = TypeVar("T", bound=SupportsRichComparison)
 
 
 def weak_predecessor(sorted_sequence: Sequence[T], point: T) -> T | None:
-    assert isinstance(sorted_sequence, SortedList), "Container must be sorted."
-
     # If the passed sequence is empty, then no predecessor.
     if not sorted_sequence:
         return None
@@ -21,7 +19,9 @@ def weak_predecessor(sorted_sequence: Sequence[T], point: T) -> T | None:
         # Hence, the weak predecessor is the last element in the list.
         return sorted_sequence[insertion_point - 1]
 
-    if (current := sorted_sequence[insertion_point]) and current > point:
+    if (
+        current := sorted_sequence[insertion_point]
+    ) and current > point:  # type: ignore
         # Then, we found a point which is the successor of our reference.
         # Hence, return the predecessor.
 
