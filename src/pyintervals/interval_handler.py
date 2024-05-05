@@ -47,7 +47,7 @@ def _make_range(
 
 
 def _relevant_nodes(
-    nodes: SortedList,
+    nodes: SortedList[TimeValueNode],
     interval: Interval,
 ) -> list[TimeValueNode]:
     return list(

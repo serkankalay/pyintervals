@@ -5,11 +5,9 @@ from functools import partial
 from typing import Iterable
 
 import pytest
-from sortedcontainers import SortedList
 
 from pyintervals import Interval
-from pyintervals.constants import TIME_ZERO
-from pyintervals.time_value_node import TimeValueNode, _simplify
+from pyintervals.time_value_node import TimeValueNode
 
 
 def _tvn_with_intervals(

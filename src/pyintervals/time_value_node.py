@@ -15,9 +15,13 @@ from pyintervals.interval import contains_point
 @dataclass(frozen=True)
 class TimeValueNode:
     time_point: datetime
-    __intervals: SortedList = field(default_factory=SortedList)
-    __starting_intervals: SortedList = field(default_factory=SortedList)
-    __ending_intervals: SortedList = field(default_factory=SortedList)
+    __intervals: SortedList[Interval] = field(default_factory=SortedList)
+    __starting_intervals: SortedList[Interval] = field(
+        default_factory=SortedList
+    )
+    __ending_intervals: SortedList[Interval] = field(
+        default_factory=SortedList
+    )
 
     @property
     def intervals(self) -> list[Interval]:
