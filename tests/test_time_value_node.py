@@ -51,6 +51,27 @@ def _to_tvn(
                 TimeValueNode(
                     time_point=datetime(1973, 1, 1),
                 ),
+                intervals=[
+                    Interval(datetime(1970, 1, 1), datetime(1977, 1, 1)),
+                    Interval(datetime(1975, 1, 1), datetime(1977, 1, 1)),
+                ],
+            ),
+            _tvn_with_intervals(
+                TimeValueNode(
+                    time_point=datetime(1973, 1, 1),
+                ),
+                intervals=[
+                    Interval(datetime(1975, 1, 1), datetime(1977, 1, 1)),
+                    Interval(datetime(1970, 1, 1), datetime(1977, 1, 1)),
+                ],
+            ),
+            True,
+        ),
+        (
+            _tvn_with_intervals(
+                TimeValueNode(
+                    time_point=datetime(1973, 1, 1),
+                ),
                 intervals=[],
             ),
             _tvn_with_intervals(

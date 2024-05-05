@@ -6,12 +6,10 @@ from typing import Collection, Iterable, Sequence
 
 from sortedcontainers import SortedList
 
+from .constants import TIME_ZERO
 from .interval import Interval
 from .search import weak_predecessor
-from .time_value_node import TimeValueNode
-
-# Unix epoch
-_TIME_ZERO: datetime = datetime(1970, 1, 1)
+from .time_value_node import TimeValueNode, _simplify
 
 
 def _to_new_node(
@@ -48,6 +46,19 @@ def _make_range(
             nodes.add(new_node)
 
 
+def _relevant_nodes(
+    nodes: SortedList[TimeValueNode],
+    interval: Interval,
+) -> list[TimeValueNode]:
+    return list(
+        nodes.irange(
+            TimeValueNode(interval.start),
+            TimeValueNode(interval.end),
+            inclusive=(True, True),
+        )
+    )
+
+
 @dataclass
 class IntervalHandler:
     __intervals: list[Interval]
@@ -60,7 +71,7 @@ class IntervalHandler:
     def _initialize(self) -> None:
         self.__intervals = list()
         self.__projection_graph = SortedList(
-            [TimeValueNode(time_point=_TIME_ZERO)]
+            [TimeValueNode(time_point=TIME_ZERO)]
         )
 
     @property
@@ -71,16 +82,19 @@ class IntervalHandler:
         self.__intervals.extend(intervals)
         for interval in intervals:
             _make_range(self.__projection_graph, interval)
-            for node in self.__projection_graph.irange(
-                TimeValueNode(interval.start),
-                TimeValueNode(interval.end),
-                inclusive=(True, True if interval.is_degenerate() else False),
-            ):
+            for node in _relevant_nodes(self.__projection_graph, interval):
                 node._add_interval(interval)
 
     def remove(self, intervals: Collection[Interval]) -> None:
         self.__intervals = [i for i in self.__intervals if i not in intervals]
-        # TODO: manage interval handler logic as well.
+
+        for interval in intervals:
+            for node in _relevant_nodes(self.__projection_graph, interval):
+                node._remove_interval(interval)
+
+        self.__projection_graph = SortedList(
+            _simplify(self.__projection_graph)
+        )
 
     def projection_graph(self) -> Sequence[TimeValueNode]:
         return list(self.__projection_graph)
