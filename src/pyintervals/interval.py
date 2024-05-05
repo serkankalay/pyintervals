@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
 
@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 class Interval:
     start: datetime
     end: datetime
+    value: float = field(default=0)
 
     def __post_init__(self) -> None:
         if self.start > self.end:
@@ -38,19 +39,26 @@ def _get_ordered(
     )
 
 
+def contains_point(interval: Interval, point: datetime) -> bool:
+    if interval.is_degenerate():
+        return interval.start == point
+    else:
+        return interval.start <= point < interval.end
+
+
 def overlaps(interval: Interval, other: Interval) -> bool:
     # If both are degenerate, then we should check
     # whether they're at the exact same time.
     if interval.is_degenerate() and other.is_degenerate():
-        return interval.start == other.start
+        return contains_point(interval, other.start)
 
     # If only 1 is degenerate, then we check that
     # the point is included in the other.
     if interval.is_degenerate():
-        return other.start <= interval.start < other.end
+        return contains_point(other, interval.start)
 
     if other.is_degenerate():
-        return interval.start <= other.start < interval.end
+        return contains_point(interval, other.start)
 
     # We have 2 non-degenerate intervals. We take them in order
     # and check whether they're exclusive.
@@ -66,6 +74,4 @@ def contains(interval: Interval, other: Interval) -> bool:
     # We have 2 non-degenerate intervals. We take them in order
     # and check whether first includes other.
     first, second = _get_ordered(interval, other)
-    return first.start <= other.start and (
-        first.end > second.end or first.end == second.end
-    )
+    return first.start <= other.start and first.end >= second.end
