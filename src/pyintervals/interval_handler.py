@@ -26,11 +26,18 @@ def _to_new_node(
     )
 
 
-def _active_node_at_time(nodes: SortedList, when: datetime) -> TimeValueNode:
-    return weak_predecessor(nodes, TimeValueNode(when))
+def _active_node_at_time(
+    nodes: SortedList[TimeValueNode], when: datetime
+) -> TimeValueNode:
+    if node := weak_predecessor(nodes, TimeValueNode(when)):
+        return node
+    else:
+        raise RuntimeError("Could not find active node at time.")
 
 
-def _make_range(nodes: SortedList, new_interval: Interval) -> None:
+def _make_range(
+    nodes: SortedList[TimeValueNode], new_interval: Interval
+) -> None:
     for t in {new_interval.start, new_interval.end}:
         if new_node := _to_new_node(
             active_node=_active_node_at_time(nodes, t),
@@ -55,7 +62,7 @@ def _relevant_nodes(
 @dataclass
 class IntervalHandler:
     __intervals: list[Interval]
-    __projection_graph: SortedList
+    __projection_graph: SortedList[TimeValueNode]
 
     def __init__(self, intervals: Iterable[Interval] = []):
         self._initialize()

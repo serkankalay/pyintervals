@@ -1,3 +1,6 @@
+modules = src/ tests/
+
+
 .PHONY: init
 init:
 	poetry install
@@ -9,29 +12,32 @@ clean:
 	rm -rf dist
 	find . | grep -E "(__pycache__|docs_.*$$|\.pyc|\.pyo$$)" | xargs rm -rf
 
-.PHONY: isort
-isort:
-	isort .
-
 .PHONY: format
 format:
-	black .
-
-.PHONY: fix
-fix: isort format
-
-.PHONY: lint
-lint:
-	flake8 .
+	poetry run black $(modules)
+	poetry run isort $(modules)
 
 .PHONY: mypy
 mypy:
-	mypy --pretty src
-	mypy --pretty tests/
+	poetry run mypy --pretty $(modules)
+
+.PHONY: flake8
+flake8:
+	poetry run flake8 $(modules)
+
+.PHONY: format-check
+format-check:
+	poetry run black --check --diff $(modules)
+	poetry run isort --check-only --diff $(modules)
+
+.PHONY: check
+check: format-check flake8 mypy
+
+nice: format check
 
 .PHONY: test
 test:
-	pytest --cov=pyintervals --cov-fail-under=95
+	poetry run pytest --cov=pyintervals --cov-fail-under=95
 
 .PHONY: docs
 docs:
