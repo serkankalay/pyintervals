@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 import bisect
-from typing import Sequence, TypeVar
+from typing import Sequence, TypeVar, cast
 
-from _typeshed import SupportsRichComparison
-
-T = TypeVar("T", bound=SupportsRichComparison)
+T = TypeVar("T")
 
 
 def weak_predecessor(sorted_sequence: Sequence[T], point: T) -> T | None:
@@ -13,15 +11,15 @@ def weak_predecessor(sorted_sequence: Sequence[T], point: T) -> T | None:
     if not sorted_sequence:
         return None
 
-    insertion_point = bisect.bisect_left(sorted_sequence, point)
+    insertion_point = bisect.bisect_left(sorted_sequence, point) # type: ignore
     if insertion_point == len(sorted_sequence):
         # Then, we need to insert to the end of the collection.
         # Hence, the weak predecessor is the last element in the list.
-        return sorted_sequence[insertion_point - 1]
+        return cast(T, sorted_sequence[insertion_point - 1])
 
     if (
         current := sorted_sequence[insertion_point]
-    ) and current > point:  # type: ignore
+    ) and current > point:
         # Then, we found a point which is the successor of our reference.
         # Hence, return the predecessor.
 
@@ -29,7 +27,7 @@ def weak_predecessor(sorted_sequence: Sequence[T], point: T) -> T | None:
         if insertion_point == 0:
             return None
         else:
-            return sorted_sequence[insertion_point - 1]
+            return cast(T, sorted_sequence[insertion_point - 1])
 
     # Otherwise, we found the correct point
-    return current
+    return cast(T, current)
