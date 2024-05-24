@@ -133,8 +133,8 @@ Features:
     - ✅ Overlap controls
     - ✅ Contain controls
 - Interval Handler:
-    - 🚧 Own intervals with associated values
-    - 🚧 Provide value projection graph
+    - ✅ Own intervals with associated values
+    - ✅ Provide value projection graph
     - 🚧 Query value over time
     - 🚧 Access intervals overlapping with a specific timespan
 - Single-level Pegging:
