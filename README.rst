@@ -103,7 +103,7 @@ If you want to programatically check whether the shop is open at a given time **
 you need to iterate over `all (in the worst case)` the time intervals the patisserie is open
 for the time you are curious about, 12:30 in this case. This will take `O(n)` time.
 
-Linear time is nice but can we not improve it? Well, with **pyintervals**, you can! `(with an upcoming feature)`
+Linear time is nice but can we not improve it? Well, with **pyintervals**, you can!
 What we essentially are curious about is the status of that beautiful store at a given time.
 **pintervals** `will` allow you fetch this value in `O(log n)` time.
 

@@ -119,6 +119,15 @@ from tests.helpers import NOT_SO_IMPORTANT_LATER_DATE, THE_DATE
             Interval(start=THE_DATE, end=THE_DATE + timedelta(hours=8)),
             True,
         ),
+        # Reference is contained in the other, so it should return false.
+        (
+            Interval(start=THE_DATE, end=THE_DATE + timedelta(days=1)),
+            Interval(
+                start=THE_DATE - timedelta(days=10),
+                end=THE_DATE + timedelta(days=10),
+            ),
+            False,
+        ),
     ],
 )
 def test_contains(reference, other, answer):

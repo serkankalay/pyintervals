@@ -71,7 +71,5 @@ def contains(interval: Interval, other: Interval) -> bool:
     if interval.is_degenerate() or other.is_degenerate():
         return overlaps(interval, other)
 
-    # We have 2 non-degenerate intervals. We take them in order
-    # and check whether first includes other.
-    first, second = _get_ordered(interval, other)
-    return first.start <= other.start and first.end >= second.end
+    # We have 2 non-degenerate intervals.
+    return interval.start <= other.start and interval.end >= other.end
