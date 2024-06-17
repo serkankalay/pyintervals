@@ -39,7 +39,7 @@ mypy = ">=0.982,<1.11"
 
 [tool.poetry.group.linting.dependencies]
 black = ">=22.10,<25.0"
-flake8 = ">=5.0.4,<7.0.0"
+flake8 = ">=5.0.4,<8.0.0"
 isort = "^5.7.0"
 
 [tool.poetry.group.dev.dependencies]
