@@ -135,7 +135,7 @@ Features:
 - Interval Handler:
     - ✅ Own intervals with associated values
     - ✅ Provide value projection graph
-    - 🚧 Query value over time
+    - ✅ Query value over time
     - 🚧 Access intervals overlapping with a specific timespan
 - Single-level Pegging:
     - 🚧 Introduce object association to Intervals
