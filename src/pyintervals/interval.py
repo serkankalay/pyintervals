@@ -67,9 +67,9 @@ def overlaps(interval: Interval, other: Interval) -> bool:
 
 
 def contains(interval: Interval, other: Interval) -> bool:
-    # If at least one is degenerate, then we can check with overlaps.
-    if interval.is_degenerate() or other.is_degenerate():
+    # If the other interval is degenerate, then we can check with overlaps.
+    if other.is_degenerate():
         return overlaps(interval, other)
 
-    # We have 2 non-degenerate intervals.
+    # We have at least one non-degenerate interval.
     return interval.start <= other.start and interval.end >= other.end

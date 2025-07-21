@@ -128,6 +128,42 @@ from tests.helpers import NOT_SO_IMPORTANT_LATER_DATE, THE_DATE
             ),
             False,
         ),
+        # Overlapping, the reference is degenerate, the other one non-degenerate
+        (
+            Interval(start=THE_DATE, end=THE_DATE),
+            Interval(
+                start=THE_DATE,
+                end=THE_DATE + timedelta(hours=12),
+            ),
+            False,
+        ),
+        # Overlapping, the reference is non-degenerate, the other one degenerate
+        (
+            Interval(start=THE_DATE, end=THE_DATE + timedelta(hours=12)),
+            Interval(
+                start=THE_DATE,
+                end=THE_DATE,
+            ),
+            True,
+        ),
+        # Non-overlapping, the reference is degenerate, the other one non-degenerate
+        (
+            Interval(start=THE_DATE, end=THE_DATE),
+            Interval(
+                start=NOT_SO_IMPORTANT_LATER_DATE,
+                end=NOT_SO_IMPORTANT_LATER_DATE + timedelta(hours=12),
+            ),
+            False,
+        ),
+        # Non-overlapping, the reference is degenerate, the other one non-degenerate
+        (
+            Interval(start=THE_DATE, end=THE_DATE + timedelta(hours=12)),
+            Interval(
+                start=NOT_SO_IMPORTANT_LATER_DATE,
+                end=NOT_SO_IMPORTANT_LATER_DATE,
+            ),
+            False,
+        ),
     ],
 )
 def test_contains(reference, other, answer):
