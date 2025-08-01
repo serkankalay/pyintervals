@@ -48,4 +48,4 @@ docs:
 publish:
 	rm -rf dist/*
 	poetry build
-	twine upload dist/*
+	poetry run twine upload dist/*

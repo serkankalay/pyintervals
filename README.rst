@@ -105,7 +105,41 @@ for the time you are curious about, 12:30 in this case. This will take `O(n)` ti
 
 Linear time is nice but can we not improve it? Well, with **pyintervals**, you can!
 What we essentially are curious about is the status of that beautiful store at a given time.
-**pintervals** `will` allow you fetch this value in `O(log n)` time.
+**pintervals** allows you to fetch this value in `O(log n)` time.
+
+.. code-block:: python
+
+  # Add open times with value 1
+  mon_interval_1 = Interval(start=datetime(2025,7,21,9,00),end=datetime(2025,7,21,12,0), value=1)
+  mon_interval_2 = Interval(start=datetime(2025,7,21,13,00),end=datetime(2025,7,21,16,0), value=1)
+  tue_interval_1 = Interval(start=datetime(2025,7,22,9,00),end=datetime(2025,7,22,12,0), value=1)
+  tue_interval_2 = Interval(start=datetime(2025,7,22,13,00),end=datetime(2025,7,22,16,0), value=1)
+
+  capacity = IntervalHandler()
+  capacity.add(
+      [
+          mon_interval_1,
+          mon_interval_2,
+          tue_interval_1,
+          tue_interval_2,
+      ]
+  )
+
+  # Check the capacity, which indicates open when value is positive
+  capacity.value_at_time(datetime(2025,7,21,9,30))
+  >>> 1  # Open
+
+  capacity.value_at_time(datetime(2025,7,21,12,30))
+  >>> 0  # Closed
+
+  capacity.value_at_time(datetime(2025,7,22,13,00))
+  >>> 1  # Open
+
+  capacity.value_at_time(datetime(2025,7,22,16,00))
+  >>> 0  # Closed
+
+  capacity.value_at_time(datetime(2025,7,22,15,59))
+  >>> 1  # Open
 
 See roadmap_ for the list of available and upcoming features.
 
@@ -135,7 +169,7 @@ Features:
 - Interval Handler:
     - ✅ Own intervals with associated values
     - ✅ Provide value projection graph
-    - 🚧 Query value over time
+    - ✅ Query value over time
     - 🚧 Access intervals overlapping with a specific timespan
 - Single-level Pegging:
     - 🚧 Introduce object association to Intervals
