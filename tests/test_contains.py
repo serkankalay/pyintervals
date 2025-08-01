@@ -128,7 +128,7 @@ from tests.helpers import NOT_SO_IMPORTANT_LATER_DATE, THE_DATE
             ),
             False,
         ),
-        # Overlapping, the reference is degenerate, the other one non-degenerate
+        # Overlapping, the reference is degenerate, the other one non-degenerate  # noqa: E501
         (
             Interval(start=THE_DATE, end=THE_DATE),
             Interval(
@@ -137,7 +137,7 @@ from tests.helpers import NOT_SO_IMPORTANT_LATER_DATE, THE_DATE
             ),
             False,
         ),
-        # Overlapping, the reference is non-degenerate, the other one degenerate
+        # Overlapping, the reference is non-degenerate, the other one degenerate  # noqa: E501
         (
             Interval(start=THE_DATE, end=THE_DATE + timedelta(hours=12)),
             Interval(
@@ -146,7 +146,7 @@ from tests.helpers import NOT_SO_IMPORTANT_LATER_DATE, THE_DATE
             ),
             True,
         ),
-        # Non-overlapping, the reference is degenerate, the other one non-degenerate
+        # Non-overlapping, the reference is degenerate, the other one non-degenerate  # noqa: E501
         (
             Interval(start=THE_DATE, end=THE_DATE),
             Interval(
@@ -155,7 +155,7 @@ from tests.helpers import NOT_SO_IMPORTANT_LATER_DATE, THE_DATE
             ),
             False,
         ),
-        # Non-overlapping, the reference is degenerate, the other one non-degenerate
+        # Non-overlapping, the reference is degenerate, the other one non-degenerate  # noqa: E501
         (
             Interval(start=THE_DATE, end=THE_DATE + timedelta(hours=12)),
             Interval(
