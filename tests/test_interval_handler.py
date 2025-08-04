@@ -321,7 +321,9 @@ def test_remove_intervals(
         ),
     ],
 )
-def test_make_range(nodes: SortedList[TimeValueNode], new_interval: Interval) -> None:
+def test_make_range(
+    nodes: SortedList[TimeValueNode], new_interval: Interval
+) -> None:
     _make_range(nodes, new_interval)
     assert {new_interval.start, new_interval.end}.issubset(
         {n.time_point for n in nodes}

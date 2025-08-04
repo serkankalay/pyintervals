@@ -20,5 +20,7 @@ from pyintervals.search import weak_predecessor
         ([1, 2, 3, 4], 4.5, 4),
     ],
 )
-def test_weak_predecessor(sequence: Sequence[int], point: float, expected: int | None) -> None:
+def test_weak_predecessor(
+    sequence: Sequence[int], point: float, expected: int | None
+) -> None:
     assert weak_predecessor(SortedList(sequence), point) == expected

@@ -46,11 +46,6 @@ format:
 .PHONY: ruff
 ruff: lint format
 
-.PHONY: remove-empty-dirs-files
-remove-empty-dirs-files:
-    chmod +x scripts/remove_empty_files_and_dirs.sh
-    scripts/remove_empty_files_and_dirs.sh
-
 .PHONY: test
 test:
 	poetry run pytest --cov=pyintervals --cov-fail-under=95
