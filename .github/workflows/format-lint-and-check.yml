@@ -1,0 +1,39 @@
+name: Format, lint, and check
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  mypy-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: |
+          pip install poetry
+
+      - name: Install dependencies
+        run: |
+          poetry install
+
+      - name: Run mypy
+        run: |
+          poetry run mypy . --strict
+
+      - name: Run Ruff format check
+        run: |
+          make ruff
+
+      - name: Check for empty files and dirs
+        run: |
+          make remove-empty-dirs-files

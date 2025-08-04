@@ -19,7 +19,7 @@ format:
 
 .PHONY: mypy
 mypy:
-	poetry run mypy --pretty $(modules)
+	poetry run mypy --pretty $(modules) --strict
 
 .PHONY: flake8
 flake8:
@@ -34,6 +34,17 @@ format-check:
 check: format-check flake8 mypy
 
 nice: format check
+
+.PHONY: lint
+lint:
+    ruff check --fix --line-length=120 --select=E,LOG,F,UP,B,SIM,I,ANN,Q,ARG,PTH,N,PERF,PLW,W --ignore=UP038
+
+.PHONY: format
+format:
+    ruff format --line-length=120
+
+.PHONY: ruff
+ruff: lint format
 
 .PHONY: test
 test:
