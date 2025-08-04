@@ -1,4 +1,4 @@
-name: Run Mypy on Merge to Main
+name: Format, lint, and check
 
 on:
   push:
@@ -24,8 +24,16 @@ jobs:
 
       - name: Install dependencies
         run: |
-          make init
+          poetry install
 
       - name: Run mypy
         run: |
-          make mypy
+          poetry run mypy . --strict
+
+      - name: Run Ruff format check
+        run: |
+          make ruff
+
+      - name: Check for empty files and dirs
+        run: |
+          make remove-empty-dirs-files

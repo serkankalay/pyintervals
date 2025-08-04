@@ -35,6 +35,22 @@ check: format-check flake8 mypy
 
 nice: format check
 
+.PHONY: lint
+lint:
+    ruff check --fix --line-length=120 --select=E,LOG,F,UP,B,SIM,I,ANN,Q,ARG,PTH,N,PERF,PLW,W --ignore=UP038
+
+.PHONY: format
+format:
+    ruff format --line-length=120
+
+.PHONY: ruff
+ruff: lint format
+
+.PHONY: remove-empty-dirs-files
+remove-empty-dirs-files:
+    chmod +x scripts/remove_empty_files_and_dirs.sh
+    scripts/remove_empty_files_and_dirs.sh
+
 .PHONY: test
 test:
 	poetry run pytest --cov=pyintervals --cov-fail-under=95
