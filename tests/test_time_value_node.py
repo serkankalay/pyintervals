@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import datetime
 from functools import partial
 from typing import Iterable
@@ -284,7 +285,7 @@ _degenerate_interval_with_value = partial(
     ],
 )
 def test_time_value_node_value(
-    intervals,
+    intervals: Sequence[Interval],
     expected_value: float,
 ) -> None:
     assert _to_tvn(intervals).value == expected_value

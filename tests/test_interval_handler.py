@@ -321,7 +321,7 @@ def test_remove_intervals(
         ),
     ],
 )
-def test_make_range(nodes: SortedList, new_interval: Interval) -> None:
+def test_make_range(nodes: SortedList[TimeValueNode], new_interval: Interval) -> None:
     _make_range(nodes, new_interval)
     assert {new_interval.start, new_interval.end}.issubset(
         {n.time_point for n in nodes}
@@ -408,7 +408,7 @@ def _complex_interval_handler() -> IntervalHandler:
     ],
 )
 def test_node_and_value_at_time(
-    time_point, n_expected_intervals, expected_value
+    time_point: datetime, n_expected_intervals: int, expected_value: int
 ) -> None:
     handler = _complex_interval_handler()
     assert (
@@ -428,7 +428,7 @@ def test_node_and_value_at_time(
     ],
 )
 def test_remove_intervals_detailed(
-    intervals: list[Interval], n_expected_tvn_reduction
+    intervals: list[Interval], n_expected_tvn_reduction: int
 ) -> None:
     handler = _complex_interval_handler()
     original_tvn_count = len(handler.projection_graph())

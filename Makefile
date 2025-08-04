@@ -19,7 +19,7 @@ format:
 
 .PHONY: mypy
 mypy:
-	poetry run mypy --pretty $(modules)
+	poetry run mypy --pretty $(modules) --strict
 
 .PHONY: flake8
 flake8:
