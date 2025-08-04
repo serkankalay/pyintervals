@@ -60,3 +60,6 @@ publish:
 	rm -rf dist/*
 	poetry build
 	twine upload dist/*
+
+.PHONY: ci-cd
+ci-cd: mypy ruff
