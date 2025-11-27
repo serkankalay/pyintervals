@@ -65,7 +65,9 @@ class IntervalHandler:
     __intervals: list[Interval]
     __projection_graph: SortedList[TimeValueNode]
 
-    def __init__(self, intervals: Iterable[Interval] = [], tz: ZoneInfo | None = None):
+    def __init__(
+        self, intervals: Iterable[Interval] = [], tz: ZoneInfo | None = None
+    ):
         self._initialize(tz)
         self.add(intervals)
 
