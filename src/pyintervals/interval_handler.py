@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Collection, Iterable, Sequence
+from zoneinfo import ZoneInfo
 
 from sortedcontainers import SortedList
 
@@ -64,14 +65,14 @@ class IntervalHandler:
     __intervals: list[Interval]
     __projection_graph: SortedList[TimeValueNode]
 
-    def __init__(self, intervals: Iterable[Interval] = []):
-        self._initialize()
+    def __init__(self, intervals: Iterable[Interval] = [], tz: ZoneInfo | None = None):
+        self._initialize(tz)
         self.add(intervals)
 
-    def _initialize(self) -> None:
+    def _initialize(self, tz: ZoneInfo | None) -> None:
         self.__intervals = list()
         self.__projection_graph = SortedList(
-            [TimeValueNode(time_point=TIME_ZERO)]
+            [TimeValueNode(time_point=TIME_ZERO.replace(tzinfo=tz))]
         )
 
     @property
