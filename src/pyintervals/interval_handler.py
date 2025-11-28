@@ -65,9 +65,7 @@ def _area_during_interval(
 ) -> timedelta:
     return sum(
         (
-            interval.value
-            * during.value
-            * overlap.duration()
+            interval.value * during.value * overlap.duration()
             for interval in handler.intervals
             if (overlap := intersection(during, interval))
         ),
