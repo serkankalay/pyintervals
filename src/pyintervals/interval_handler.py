@@ -65,7 +65,9 @@ def _area_during_interval(
 ) -> timedelta:
     return sum(
         (
-            intv.value * interval.value * intersection(interval, intv).duration()
+            intv.value
+            * interval.value
+            * intersection(interval, intv).duration()
             for intv in handler.intervals
         ),
         start=timedelta(0),
