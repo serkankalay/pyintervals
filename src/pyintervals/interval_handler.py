@@ -61,14 +61,15 @@ def _relevant_nodes(
 
 def _area_during_interval(
     handler: IntervalHandler,
-    interval: Interval,
+    during: Interval,
 ) -> timedelta:
     return sum(
         (
-            intv.value
-            * interval.value
-            * intersection(interval, intv).duration()
-            for intv in handler.intervals
+            interval.value
+            * during.value
+            * overlap.duration()
+            for interval in handler.intervals
+            if (overlap := intersection(during, interval))
         ),
         start=timedelta(0),
     )
