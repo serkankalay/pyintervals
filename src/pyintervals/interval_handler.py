@@ -65,11 +65,8 @@ def _area_during_interval(
 ) -> timedelta:
     return sum(
         (
-            intv.value * intersection(interval, intv).duration()
-            for node in _relevant_nodes(
-                SortedList(handler.projection_graph()), interval
-            )
-            for intv in (node.starting_intervals + node.ending_intervals)
+            intv.value * interval.value * intersection(interval, intv).duration()
+            for intv in handler.intervals
         ),
         start=timedelta(0),
     )
