@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Collection, Iterable, Sequence
 
 from sortedcontainers import SortedList
 
 from .constants import TIME_ZERO
-from .interval import Interval
+from .interval import Interval, intersection
 from .search import weak_predecessor
 from .time_value_node import TimeValueNode, _simplify
 
@@ -59,6 +59,20 @@ def _relevant_nodes(
     )
 
 
+def _area_during_interval(
+    handler: IntervalHandler,
+    during: Interval,
+) -> timedelta:
+    return sum(
+        (
+            interval.value * during.value * overlap.duration()
+            for interval in handler.intervals
+            if (overlap := intersection(during, interval))
+        ),
+        start=timedelta(0),
+    )
+
+
 @dataclass
 class IntervalHandler:
     __intervals: list[Interval]
@@ -104,3 +118,6 @@ class IntervalHandler:
 
     def value_at_time(self, when: datetime) -> float:
         return _active_node_at_time(self.__projection_graph, when).value
+
+    def get_area(self, during: Interval) -> timedelta:
+        return _area_during_interval(self, during)

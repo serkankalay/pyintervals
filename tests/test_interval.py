@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from pyintervals import Interval
+from pyintervals import Interval, IntervalHandler
 from pyintervals.interval import contains_point
 from tests.helpers import FUTURE_DATE, NOT_SO_IMPORTANT_LATER_DATE, THE_DATE
 
@@ -101,3 +101,42 @@ def test_interval_duration(request, interval, expected_duration):
 )
 def test_contains_point(interval, point, answer):
     assert contains_point(interval, point) == answer
+
+
+@pytest.mark.parametrize(
+    "intervals, during, answer",
+    [
+        pytest.param(
+            [
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 2), value=2),
+                Interval(datetime(2023, 1, 2), datetime(2023, 1, 3), value=3),
+                Interval(datetime(2023, 1, 3), datetime(2023, 1, 4), value=4),
+            ],
+            Interval(
+                datetime(2023, 1, 1, 12), datetime(2023, 1, 3, 12), value=2.5
+            ),
+            2 * 2.5 * timedelta(hours=12)
+            + 3 * 2.5 * timedelta(days=1)
+            + 4 * 2.5 * timedelta(hours=12),
+        ),
+        pytest.param(
+            [
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 2), value=2),
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 2), value=3),
+                Interval(
+                    datetime(2023, 1, 1, 12), datetime(2023, 1, 1, 12), value=4
+                ),
+            ],
+            Interval(datetime(2023, 1, 1), datetime(2023, 1, 2), value=2.5),
+            2 * 2.5 * timedelta(days=1)
+            + 3 * 2.5 * timedelta(days=1)
+            + 4 * 2.5 * timedelta(hours=0),
+        ),
+    ],
+)
+def test_area_during_interval(intervals, during, answer):
+    handler = IntervalHandler(intervals=intervals)
+
+    result = handler.get_area(during)
+
+    assert result == answer

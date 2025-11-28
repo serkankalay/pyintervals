@@ -73,3 +73,15 @@ def contains(interval: Interval, other: Interval) -> bool:
 
     # We have at least one non-degenerate interval.
     return interval.start <= other.start and interval.end >= other.end
+
+
+def intersection(
+    interval: Interval, other_interval: Interval
+) -> Interval | None:
+    if overlaps(interval, other_interval):
+        return Interval(
+            max([interval.start, other_interval.start]),
+            min([interval.end, other_interval.end]),
+        )
+    else:
+        return None
