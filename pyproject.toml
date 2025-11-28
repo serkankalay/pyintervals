@@ -24,10 +24,11 @@ keywords = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8.1,<4.0"
+python = ">=3.9,<4.0.0"
 importlib-metadata = {version = ">=1,<5", python = "<3.8"}
 sortedcontainers = "^2.4.0"
 sortedcontainers-stubs = "^2.4.2"
+twine = "^6.2.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = ">=7.0.1,<9.0.0"
