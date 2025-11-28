@@ -11,7 +11,8 @@ from pyintervals.interval import intersection
 @pytest.mark.parametrize(
     "s1, e1, s2, e2, s_expected, e_expected",
     [
-        # A single test using datetimes rather than dates to show that this function works using
+        # A single test using datetimes rather than dates to show
+        # that this function works using
         # datetimes and not dates.
         (
             "2020-01-01T00:00Z",
@@ -21,9 +22,11 @@ from pyintervals.interval import intersection
             "2020-02-01T00:00Z",
             "2020-03-01T00:00Z",
         ),
-        # In the rest of the tests, we'll simply use dates because they're a bit easier to read
+        # In the rest of the tests, we'll simply use dates
+        # because they're a bit easier to read
         # and you can cover just as many test cases with them.
-        # interval is modeled as closed-open, i.e. [start, end), hence the expected outcomes
+        # interval is modeled as closed-open, i.e. [start, end),
+        # hence the expected outcomes
         (
             "2020-01-01",
             "2020-03-01",
