@@ -15,12 +15,12 @@ from pyintervals.interval import intersection
         # that this function works using
         # datetimes and not dates.
         (
-            "2020-01-01T00:00:00Z",
-            "2020-03-01T00:00:00Z",
-            "2020-02-01T00:00:00Z",
-            "2020-04-01T00:00:00Z",
-            "2020-02-01T00:00:00Z",
-            "2020-03-01T00:00:00Z",
+            "2020-01-01T00:00:00+00:00",
+            "2020-03-01T00:00:00+00:00",
+            "2020-02-01T00:00:00+00:00",
+            "2020-04-01T00:00:00+00:00",
+            "2020-02-01T00:00:00+00:00",
+            "2020-03-01T00:00:00+00:00",
         ),
         # In the rest of the tests, we'll simply use dates
         # because they're a bit easier to read
