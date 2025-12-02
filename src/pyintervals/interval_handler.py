@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import itertools
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Collection, Iterable, Sequence
@@ -8,7 +9,7 @@ from zoneinfo import ZoneInfo
 from sortedcontainers import SortedList
 
 from .constants import TIME_ZERO
-from .interval import Interval, intersection
+from .interval import Interval, intersection, contains_point
 from .search import weak_predecessor
 from .time_value_node import TimeValueNode, _simplify
 
@@ -60,15 +61,20 @@ def _relevant_nodes(
     )
 
 
-def _area_during_interval(
-    handler: IntervalHandler,
-    during: Interval,
-) -> timedelta:
+def _area_during_interval(handler: IntervalHandler, during: Interval) -> timedelta:
+    first_node_in_interval = TimeValueNode.clone(handler.node_at_time(during.start), during.start)
+    last_node_in_interval = TimeValueNode.clone(handler.node_at_time(during.end), during.end)
+
+    relevant_nodes = itertools.chain(
+        [first_node_in_interval],
+        _relevant_nodes(handler.projection_graph(), during),
+        [last_node_in_interval],
+    )
+
     return sum(
         (
-            interval.value * during.value * overlap.duration()
-            for interval in handler.intervals
-            if (overlap := intersection(during, interval))
+            during.value * start.value * (end.time_point - start.time_point)
+            for start, end in itertools.pairwise(relevant_nodes)
         ),
         start=timedelta(0),
     )
@@ -113,8 +119,8 @@ class IntervalHandler:
             _simplify(self.__projection_graph)
         )
 
-    def projection_graph(self) -> Sequence[TimeValueNode]:
-        return list(self.__projection_graph)
+    def projection_graph(self) -> SortedList[TimeValueNode]:
+        return SortedList(self.__projection_graph)
 
     def node_at_time(self, when: datetime) -> TimeValueNode:
         return _active_node_at_time(self.__projection_graph, when)
