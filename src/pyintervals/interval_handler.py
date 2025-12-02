@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import itertools
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Collection, Iterable, Sequence
 from zoneinfo import ZoneInfo
 
@@ -90,9 +90,12 @@ def _area_during_interval(
 class IntervalHandler:
     __intervals: list[Interval]
     __projection_graph: SortedList[TimeValueNode]
+    __tz: ZoneInfo | timezone | None
 
     def __init__(
-        self, intervals: Iterable[Interval] = [], tz: ZoneInfo | None = None
+        self,
+        intervals: Iterable[Interval] = [],
+        tz: ZoneInfo | timezone | None = None,
     ):
         self._initialize(tz)
         self.add(intervals)
@@ -102,10 +105,48 @@ class IntervalHandler:
         self.__projection_graph = SortedList(
             [TimeValueNode(time_point=TIME_ZERO.replace(tzinfo=tz))]
         )
+        self.__tz = tz
 
     @property
     def intervals(self) -> list[Interval]:
         return list(self.__intervals)
+
+    def __add__(
+        self, other: IntervalHandler | Iterable[Interval]
+    ) -> IntervalHandler:
+        if not isinstance(other, (IntervalHandler, Iterable)):
+            raise NotImplementedError(
+                f"Cannot add {type(other)} to IntervalHandler class."
+            )
+
+        intervals = (
+            other.intervals if isinstance(other, IntervalHandler) else other
+        )
+
+        return IntervalHandler(
+            intervals=self.__intervals + intervals, tz=self.__tz
+        )
+
+    def __sub__(
+        self, other: IntervalHandler | Iterable[Interval]
+    ) -> IntervalHandler:
+        if not isinstance(other, (IntervalHandler, Iterable)):
+            raise NotImplementedError(
+                f"Cannot subtract {type(other)} from IntervalHandler class."
+            )
+
+        intervals = (
+            other.intervals if isinstance(other, IntervalHandler) else other
+        )
+
+        return IntervalHandler(
+            intervals=self.__intervals
+            + [
+                Interval(interval.start, interval.end, value=-interval.value)
+                for interval in intervals
+            ],
+            tz=self.__tz,
+        )
 
     def add(self, intervals: Iterable[Interval]) -> None:
         self.__intervals.extend(intervals)
