@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 from sortedcontainers import SortedList
 
 from .constants import TIME_ZERO
-from .interval import Interval, intersection, contains_point
+from .interval import Interval, contains_point, intersection
 from .search import weak_predecessor
 from .time_value_node import TimeValueNode, _simplify
 
@@ -61,9 +61,15 @@ def _relevant_nodes(
     )
 
 
-def _area_during_interval(handler: IntervalHandler, during: Interval) -> timedelta:
-    first_node_in_interval = TimeValueNode.clone(handler.node_at_time(during.start), during.start)
-    last_node_in_interval = TimeValueNode.clone(handler.node_at_time(during.end), during.end)
+def _area_during_interval(
+    handler: IntervalHandler, during: Interval
+) -> timedelta:
+    first_node_in_interval = TimeValueNode.clone(
+        handler.node_at_time(during.start), during.start
+    )
+    last_node_in_interval = TimeValueNode.clone(
+        handler.node_at_time(during.end), during.end
+    )
 
     relevant_nodes = itertools.chain(
         [first_node_in_interval],
