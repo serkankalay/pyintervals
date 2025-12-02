@@ -127,6 +127,11 @@ class IntervalHandler:
             intervals=self.__intervals + intervals, tz=self.__tz
         )
 
+    def __iadd__(
+        self, other: IntervalHandler | Iterable[Interval]
+    ) -> IntervalHandler:
+        return other.__add__(self)
+
     def __sub__(
         self, other: IntervalHandler | Iterable[Interval]
     ) -> IntervalHandler:
@@ -147,6 +152,11 @@ class IntervalHandler:
             ],
             tz=self.__tz,
         )
+
+    def __isub__(
+        self, other: IntervalHandler | Iterable[Interval]
+    ) -> IntervalHandler:
+        return other.__sub__(self)
 
     def add(self, intervals: Iterable[Interval]) -> None:
         self.__intervals.extend(intervals)
