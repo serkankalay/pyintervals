@@ -77,7 +77,9 @@ def _area_during_interval(
 
     relevant_nodes = itertools.chain(
         [first_node_in_interval],
-        _relevant_nodes(handler.projection_graph(), during),
+        # ↓ Everything except the first node, since it's not ↓
+        # ↓ necessarily part of the interval ↓
+        _relevant_nodes(handler.projection_graph(), during)[1:],
         [last_node_in_interval],
     )
 
