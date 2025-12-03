@@ -179,6 +179,7 @@ class IntervalHandler:
                 node._add_interval(interval)
 
     def remove(self, intervals: Collection[Interval]) -> None:
+        """Removes without simplifying the intervals."""
         self.__intervals = [i for i in self.__intervals if i not in intervals]
 
         for interval in intervals:
