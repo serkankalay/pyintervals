@@ -12,9 +12,7 @@ class Interval:
 
     def __post_init__(self) -> None:
         if self.start > self.end:
-            raise RuntimeError(
-                f"Invalid interval: {self.end=} is earlier than {self.start=}"
-            )
+            raise RuntimeError(f"Invalid interval: {self.end=} is earlier than {self.start=}")
 
     def is_degenerate(self) -> bool:
         return self.start == self.end
@@ -29,14 +27,8 @@ class Interval:
         return contains(self, other)
 
 
-def _get_ordered(
-    interval: Interval, other: Interval
-) -> tuple[Interval, Interval]:
-    return (
-        (interval, other)
-        if interval.start <= other.start
-        else (other, interval)
-    )
+def _get_ordered(interval: Interval, other: Interval) -> tuple[Interval, Interval]:
+    return (interval, other) if interval.start <= other.start else (other, interval)
 
 
 def contains_point(interval: Interval, point: datetime) -> bool:
@@ -75,9 +67,7 @@ def contains(interval: Interval, other: Interval) -> bool:
     return interval.start <= other.start and interval.end >= other.end
 
 
-def intersection(
-    interval: Interval, other_interval: Interval
-) -> Interval | None:
+def intersection(interval: Interval, other_interval: Interval) -> Interval | None:
     if overlaps(interval, other_interval):
         return Interval(
             max([interval.start, other_interval.start]),

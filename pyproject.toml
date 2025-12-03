@@ -47,7 +47,7 @@ isort = "^5.7.0"
 tox = ">=3.26,<5.0"
 
 [tool.black]
-line-length = 79
+line-length = 120
 include = '\.pyi?$'
 exclude = '''
 /(
@@ -63,7 +63,7 @@ exclude = '''
 '''
 
 [tool.isort]
-line_length = 79
+line_length = 120
 profile = 'black'
 add_imports = ['from __future__ import annotations']
 

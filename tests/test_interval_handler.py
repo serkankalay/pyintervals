@@ -188,9 +188,7 @@ def test_interval_handler_with_intervals(
     handler = IntervalHandler(intervals=intervals)
     assert len(handler.intervals) == n_expected_intervals
     assert len(handler.projection_graph()) == n_expected_tvn
-    assert [
-        tvn.time_point for tvn in handler.projection_graph()
-    ] == expected_tvn_time_points
+    assert [tvn.time_point for tvn in handler.projection_graph()] == expected_tvn_time_points
     for interval in intervals:
         for node in handler.projection_graph():
             if contains_point(interval, node.time_point):
@@ -237,9 +235,7 @@ def test_add_intervals(
     handler.add(new_intervals)
     assert prev_count + len(new_intervals) == len(handler.intervals)
     for interval in new_intervals:
-        assert (
-            interval in handler.node_at_time(interval.start).starting_intervals
-        )
+        assert interval in handler.node_at_time(interval.start).starting_intervals
         assert interval in handler.node_at_time(interval.end).ending_intervals
 
 
@@ -257,13 +253,8 @@ def test_remove_intervals(
     to_remove = handler.intervals[0]
     handler.remove([to_remove])
     assert original_count - 1 == len(handler.intervals)
-    assert (
-        to_remove
-        not in handler.node_at_time(to_remove.start).starting_intervals
-    )
-    assert (
-        to_remove not in handler.node_at_time(to_remove.end).ending_intervals
-    )
+    assert to_remove not in handler.node_at_time(to_remove.start).starting_intervals
+    assert to_remove not in handler.node_at_time(to_remove.end).ending_intervals
 
     # Remove all
     handler.remove(handler.intervals)
@@ -323,9 +314,7 @@ def test_remove_intervals(
 )
 def test_make_range(nodes: SortedList, new_interval: Interval) -> None:
     _make_range(nodes, new_interval)
-    assert {new_interval.start, new_interval.end}.issubset(
-        {n.time_point for n in nodes}
-    )
+    assert {new_interval.start, new_interval.end}.issubset({n.time_point for n in nodes})
 
 
 def _complex_intervals() -> list[Interval]:
@@ -407,13 +396,9 @@ def _complex_interval_handler() -> IntervalHandler:
         (datetime(2023, 3, 1), 0, 0),
     ],
 )
-def test_node_and_value_at_time(
-    time_point, n_expected_intervals, expected_value
-) -> None:
+def test_node_and_value_at_time(time_point, n_expected_intervals, expected_value) -> None:
     handler = _complex_interval_handler()
-    assert (
-        len(handler.node_at_time(time_point).intervals) == n_expected_intervals
-    )
+    assert len(handler.node_at_time(time_point).intervals) == n_expected_intervals
     assert handler.value_at_time(time_point) == expected_value
 
 
@@ -427,17 +412,9 @@ def test_node_and_value_at_time(
         ([_complex_intervals()[7]], 1),
     ],
 )
-def test_remove_intervals_detailed(
-    intervals: list[Interval], n_expected_tvn_reduction
-) -> None:
+def test_remove_intervals_detailed(intervals: list[Interval], n_expected_tvn_reduction) -> None:
     handler = _complex_interval_handler()
     original_tvn_count = len(handler.projection_graph())
     handler.remove(intervals)
-    assert len(handler.projection_graph()) == (
-        original_tvn_count - n_expected_tvn_reduction
-    )
-    assert not any(
-        interval in node.intervals
-        for node in handler.projection_graph()
-        for interval in intervals
-    )
+    assert len(handler.projection_graph()) == (original_tvn_count - n_expected_tvn_reduction)
+    assert not any(interval in node.intervals for node in handler.projection_graph() for interval in intervals)
