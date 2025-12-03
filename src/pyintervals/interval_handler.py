@@ -4,7 +4,7 @@ import itertools
 import operator
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Callable, Collection, Iterable, Sequence, OrderedDict
+from typing import Callable, Collection, Iterable, OrderedDict, Sequence
 from zoneinfo import ZoneInfo
 
 from sortedcontainers import SortedList
