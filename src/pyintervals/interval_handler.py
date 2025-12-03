@@ -53,14 +53,14 @@ def _make_range(
 def _operate(
     a: IntervalHandler,
     b: IntervalHandler,
-    operator: Callable[[float, float], float],
+    operand: Callable[[float, float], float],
 ) -> IntervalHandler:
     if not isinstance(b, IntervalHandler):
         raise TypeError(
-            f"unsupported operand type(s) for {operator.__name__}: "
+            f"unsupported operand type(s) for {operand.__name__}: "
             f"'{type(a)}' and '{type(b)}'"
         )
-    all_nodes = sorted(
+    change_times = set(
         n.time_point
         for n in itertools.chain(a.projection_graph(), b.projection_graph())
     )
@@ -70,9 +70,9 @@ def _operate(
             Interval(
                 start=start,
                 end=end,
-                value=operator(a.value_at_time(start), b.value_at_time(start)),
+                value=operand(a.value_at_time(start), b.value_at_time(start)),
             )
-            for start, end in itertools.pairwise(all_nodes)
+            for start, end in more_itertools.pairwise(sorted(change_times))
         ],
         tz=a._tz,
     )
@@ -142,19 +142,19 @@ class IntervalHandler:
         return list(self.__intervals)
 
     def __add__(self, other: IntervalHandler) -> IntervalHandler:
-        return _operate(self, other, operator=operator.add)
+        return _operate(self, other, operand=operator.add)
 
     def __iadd__(self, other: IntervalHandler) -> None:
         return self.add(other.intervals)
 
     def __sub__(self, other: IntervalHandler) -> IntervalHandler:
-        return _operate(self, other, operator=operator.sub)
+        return _operate(self, other, operand=operator.sub)
 
     def __isub__(self, other: IntervalHandler) -> None:
         return self.remove(other.intervals)
 
     def __mul__(self, other: IntervalHandler) -> IntervalHandler:
-        return _operate(self, other, operator=operator.mul)
+        return _operate(self, other, operand=operator.mul)
 
     def __imul__(self, other: IntervalHandler) -> IntervalHandler:
         raise NotImplementedError(
@@ -163,7 +163,7 @@ class IntervalHandler:
         )
 
     def __truediv__(self, other: IntervalHandler) -> IntervalHandler:
-        return _operate(self, other, operator=operator.truediv)
+        return _operate(self, other, operand=operator.truediv)
 
     def __itruediv__(self, other: IntervalHandler) -> IntervalHandler:
         raise NotImplementedError(
