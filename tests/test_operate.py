@@ -23,6 +23,16 @@ IN_PLACE_OPERAND_MAPPING = {
         pytest.param(
             operator.add,
             IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=10)]),
+            IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=5)]),
+            IntervalHandler(intervals=[
+                Interval(TIME_ZERO, T_ZERO - timedelta(days=3), value=0),
+                Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=15),
+            ]),
+            id="adding two IntervalHandlers. They both have the exact same domain."
+        ),
+        pytest.param(
+            operator.add,
+            IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=10)]),
             IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=1), T_ZERO + timedelta(days=1), value=5)]),
             IntervalHandler(intervals=[
                 Interval(TIME_ZERO, T_ZERO - timedelta(days=3), value=0),
@@ -70,6 +80,16 @@ IN_PLACE_OPERAND_MAPPING = {
         pytest.param(
             operator.sub,
             IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=10)]),
+            IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=5)]),
+            IntervalHandler(intervals=[
+                Interval(TIME_ZERO, T_ZERO - timedelta(days=3), value=0),
+                Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=5),
+            ]),
+            id="subtracting two IntervalHandlers. They both have the exact same domain."
+        ),
+        pytest.param(
+            operator.sub,
+            IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=10)]),
             IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=1), T_ZERO + timedelta(days=1), value=5)]),
             IntervalHandler(intervals=[
                 Interval(TIME_ZERO, T_ZERO - timedelta(days=3), value=0),
@@ -113,6 +133,63 @@ IN_PLACE_OPERAND_MAPPING = {
                 Interval(T_ZERO + timedelta(days=5), T_ZERO + timedelta(days=10), value=-5),
             ]),
             id="subtracting two IntervalHandlers. One is disjoint from the other."
+        ),
+        pytest.param(
+            operator.mul,
+            IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=10)]),
+            IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=5)]),
+            IntervalHandler(intervals=[
+                Interval(TIME_ZERO, T_ZERO - timedelta(days=3), value=0),
+                Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=50),
+            ]),
+            id="multiplying two IntervalHandlers. They both have the exact same domain."
+        ),
+        pytest.param(
+            operator.mul,
+            IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=10)]),
+            IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=1), T_ZERO + timedelta(days=1), value=5)]),
+            IntervalHandler(intervals=[
+                Interval(TIME_ZERO, T_ZERO - timedelta(days=3), value=0),
+                Interval(T_ZERO - timedelta(days=3), T_ZERO - timedelta(days=1), value=0),
+                Interval(T_ZERO - timedelta(days=1), T_ZERO + timedelta(days=1), value=50),
+                Interval(T_ZERO + timedelta(days=1), T_ZERO + timedelta(days=3), value=0),
+            ]),
+            id="multiplying two IntervalHandlers. One is contained completely within the other."
+        ),
+        pytest.param(
+            operator.mul,
+            IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=10)]),
+            IntervalHandler(intervals=[Interval(T_ZERO + timedelta(days=1), T_ZERO + timedelta(days=5), value=5)]),
+            IntervalHandler(intervals=[
+                Interval(TIME_ZERO, T_ZERO - timedelta(days=3), value=0),
+                Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=1), value=0),
+                Interval(T_ZERO + timedelta(days=1), T_ZERO + timedelta(days=3), value=50),
+                Interval(T_ZERO + timedelta(days=3), T_ZERO + timedelta(days=5), value=0),
+            ]),
+            id="multiplying two IntervalHandlers. One overlaps partially with the other."
+        ),
+        pytest.param(
+            operator.mul,
+            IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=10)]),
+            IntervalHandler(intervals=[Interval(T_ZERO + timedelta(days=3), T_ZERO + timedelta(days=5), value=5)]),
+            IntervalHandler(intervals=[
+                Interval(TIME_ZERO, T_ZERO - timedelta(days=3), value=0),
+                Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=0),
+                Interval(T_ZERO + timedelta(days=3), T_ZERO + timedelta(days=5), value=0),
+            ]),
+            id="multiplying two IntervalHandlers. One is adjacent to the other."
+        ),
+        pytest.param(
+            operator.mul,
+            IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=10)]),
+            IntervalHandler(intervals=[Interval(T_ZERO + timedelta(days=5), T_ZERO + timedelta(days=10), value=5)]),
+            IntervalHandler(intervals=[
+                Interval(TIME_ZERO, T_ZERO - timedelta(days=3), value=0),
+                Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=0),
+                Interval(T_ZERO + timedelta(days=3), T_ZERO + timedelta(days=5), value=0),
+                Interval(T_ZERO + timedelta(days=5), T_ZERO + timedelta(days=10), value=0),
+            ]),
+            id="multiplying two IntervalHandlers. One is disjoint from the other."
         ),
     ]
 )
