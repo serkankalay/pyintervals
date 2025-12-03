@@ -2,15 +2,16 @@ from __future__ import annotations
 
 import itertools
 import operator
+from collections.abc import Callable, Collection, Iterable
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Callable, Collection, Iterable, OrderedDict, Sequence
 from zoneinfo import ZoneInfo
 
+import more_itertools
 from sortedcontainers import SortedList
 
 from .constants import TIME_ZERO
-from .interval import Interval, contains_point, intersection
+from .interval import Interval
 from .search import weak_predecessor
 from .time_value_node import TimeValueNode, _simplify
 
@@ -51,9 +52,14 @@ def _make_range(
 
 def _operate(
     a: IntervalHandler,
-    b: IntervalHandler | Sequence[Interval],
+    b: IntervalHandler,
     operator: Callable[[float, float], float],
 ) -> IntervalHandler:
+    if not isinstance(b, IntervalHandler):
+        raise TypeError(
+            f"unsupported operand type(s) for {operator.__name__}: "
+            f"'{type(a)}' and '{type(b)}'"
+        )
     all_nodes = sorted(
         n.time_point
         for n in itertools.chain(a.projection_graph(), b.projection_graph())
@@ -104,7 +110,7 @@ def _area_during_interval(
     return sum(
         (
             during.value * start.value * (end.time_point - start.time_point)
-            for start, end in itertools.pairwise(relevant_nodes)
+            for start, end in more_itertools.pairwise(relevant_nodes)
         ),
         start=timedelta(0),
     )
@@ -124,7 +130,7 @@ class IntervalHandler:
         self._initialize(tz)
         self.add(intervals)
 
-    def _initialize(self, tz: ZoneInfo | None) -> None:
+    def _initialize(self, tz: ZoneInfo | timezone | None) -> None:
         self.__intervals = list()
         self.__projection_graph = SortedList(
             [TimeValueNode(time_point=TIME_ZERO.replace(tzinfo=tz))]
@@ -135,80 +141,35 @@ class IntervalHandler:
     def intervals(self) -> list[Interval]:
         return list(self.__intervals)
 
-    def __add__(
-        self, other: IntervalHandler | Iterable[Interval]
-    ) -> IntervalHandler:
-        if not isinstance(other, (IntervalHandler, Iterable)):
-            raise NotImplementedError(
-                f"Cannot add {type(other)} to IntervalHandler class."
-            )
+    def __add__(self, other: IntervalHandler) -> IntervalHandler:
+        return _operate(self, other, operator=operator.add)
 
-        intervals = (
-            other.intervals if isinstance(other, IntervalHandler) else other
-        )
+    def __iadd__(self, other: IntervalHandler) -> None:
+        return self.add(other.intervals)
 
-        return IntervalHandler(
-            intervals=self.__intervals + intervals, tz=self._tz
-        )
+    def __sub__(self, other: IntervalHandler) -> IntervalHandler:
+        return _operate(self, other, operator=operator.sub)
 
-    def __iadd__(
-        self, other: IntervalHandler | Iterable[Interval]
-    ) -> IntervalHandler:
-        return other.__add__(self)
+    def __isub__(self, other: IntervalHandler) -> None:
+        return self.remove(other.intervals)
 
-    def __sub__(
-        self, other: IntervalHandler | Iterable[Interval]
-    ) -> IntervalHandler:
-        if not isinstance(other, (IntervalHandler, Iterable)):
-            raise NotImplementedError(
-                f"Cannot subtract {type(other)} from IntervalHandler class."
-            )
-
-        intervals = (
-            other.intervals if isinstance(other, IntervalHandler) else other
-        )
-
-        return IntervalHandler(
-            intervals=self.__intervals
-            + [
-                Interval(interval.start, interval.end, value=-interval.value)
-                for interval in intervals
-            ],
-            tz=self._tz,
-        )
-
-    def __isub__(
-        self, other: IntervalHandler | Iterable[Interval]
-    ) -> IntervalHandler:
-        return other.__sub__(self)
-
-    def __mul__(
-        self, other: IntervalHandler | Iterable[Interval]
-    ) -> IntervalHandler:
-        if not isinstance(other, (IntervalHandler, Iterable)):
-            raise NotImplementedError(
-                f"Cannot multiply {type(other)} by IntervalHandler class."
-            )
+    def __mul__(self, other: IntervalHandler) -> IntervalHandler:
         return _operate(self, other, operator=operator.mul)
 
-    def __imul__(
-        self, other: IntervalHandler | Iterable[Interval]
-    ) -> IntervalHandler:
-        return other.__mul__(self)
+    def __imul__(self, other: IntervalHandler) -> IntervalHandler:
+        raise NotImplementedError(
+            f"unsupported operand type(s) for *=: "
+            f"'{type(self)}' and '{type(other)}'"
+        )
 
-    def __truediv__(
-        self, other: IntervalHandler | Iterable[Interval]
-    ) -> IntervalHandler:
-        if not isinstance(other, (IntervalHandler, Iterable)):
-            raise NotImplementedError(
-                f"Cannot divide {type(other)} by IntervalHandler class."
-            )
+    def __truediv__(self, other: IntervalHandler) -> IntervalHandler:
         return _operate(self, other, operator=operator.truediv)
 
-    def __itruediv__(
-        self, other: IntervalHandler | Iterable[Interval]
-    ) -> IntervalHandler:
-        return other.__itruediv__(self)
+    def __itruediv__(self, other: IntervalHandler) -> IntervalHandler:
+        raise NotImplementedError(
+            f"unsupported operand type(s) for /=: "
+            f"'{type(self)}' and '{type(other)}'"
+        )
 
     def add(self, intervals: Iterable[Interval]) -> None:
         self.__intervals.extend(intervals)
