@@ -965,9 +965,7 @@ IN_PLACE_OPERAND_MAPPING = {
                         T_NOW + timedelta(days=10),
                         value=0,
                     ),
-                    Interval(
-                        T_NOW + timedelta(days=10), datetime.max, value=0
-                    ),
+                    Interval(T_NOW + timedelta(days=10), datetime.max, value=0),
                 ]
             ),
             id="dividing two IntervalHandlers. They both have the exact same domain. "

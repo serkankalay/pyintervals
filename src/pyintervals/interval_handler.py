@@ -49,14 +49,8 @@ def _operate(
 ) -> IntervalHandler:
     """Only call this function through the methods bound to `IntervalHandler`."""
     if not isinstance(b, IntervalHandler):
-        raise TypeError(
-            f"unsupported operand type(s) for {operand.__name__}: "
-            f"'{type(a)}' and '{type(b)}'"
-        )
-    change_times = set(
-        n.time_point
-        for n in itertools.chain(a.projection_graph(), b.projection_graph())
-    )
+        raise TypeError(f"unsupported operand type(s) for {operand.__name__}: " f"'{type(a)}' and '{type(b)}'")
+    change_times = set(n.time_point for n in itertools.chain(a.projection_graph(), b.projection_graph()))
 
     return IntervalHandler(
         intervals=[
@@ -85,15 +79,9 @@ def _relevant_nodes(
         ]
 
 
-def _area_during_interval(
-    handler: IntervalHandler, during: Interval
-) -> timedelta:
-    first_node_in_interval = TimeValueNode.clone(
-        handler.node_at_time(during.start), during.start
-    )
-    last_node_in_interval = TimeValueNode.clone(
-        handler.node_at_time(during.end), during.end
-    )
+def _area_during_interval(handler: IntervalHandler, during: Interval) -> timedelta:
+    first_node_in_interval = TimeValueNode.clone(handler.node_at_time(during.start), during.start)
+    last_node_in_interval = TimeValueNode.clone(handler.node_at_time(during.end), during.end)
 
     relevant_nodes = itertools.chain(
         [first_node_in_interval],
