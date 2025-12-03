@@ -9,7 +9,6 @@ import pytest
 
 from pyintervals import Interval, IntervalHandler
 from pyintervals.constants import TIME_ZERO
-from pyintervals.interval_handler import _operate
 
 T_NOW = datetime(2025, 1, 1)
 
