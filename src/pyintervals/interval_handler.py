@@ -160,19 +160,15 @@ class IntervalHandler:
         return _operate(self, other, operand=operator.mul)
 
     def __imul__(self, other: IntervalHandler) -> IntervalHandler:
-        raise NotImplementedError(
-            f"unsupported operand type(s) for *=: "
-            f"'{type(self)}' and '{type(other)}'"
-        )
+        simplified = _operate(self, other, operand=operator.mul)
+        self.__init__(intervals=simplified.intervals, tz=self._tz)
 
     def __truediv__(self, other: IntervalHandler) -> IntervalHandler:
         return _operate(self, other, operand=operator.truediv)
 
     def __itruediv__(self, other: IntervalHandler) -> IntervalHandler:
-        raise NotImplementedError(
-            f"unsupported operand type(s) for /=: "
-            f"'{type(self)}' and '{type(other)}'"
-        )
+        simplified = _operate(self, other, operand=operator.truediv)
+        self.__init__(intervals=simplified.intervals, tz=self._tz)
 
     def add(self, intervals: Iterable[Interval]) -> None:
         """Adds without simplifying the intervals."""

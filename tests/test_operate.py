@@ -13,6 +13,8 @@ T_ZERO = datetime(2025, 1, 1)
 IN_PLACE_OPERAND_MAPPING = {
     operator.add: operator.iadd,
     operator.sub: operator.isub,
+    operator.mul: operator.imul,
+    operator.truediv: operator.itruediv,
 }
 
 @pytest.mark.parametrize(
@@ -65,6 +67,53 @@ IN_PLACE_OPERAND_MAPPING = {
             ]),
             id="adding two IntervalHandlers. One is disjoint from the other."
         ),
+        pytest.param(
+            operator.sub,
+            IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=10)]),
+            IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=1), T_ZERO + timedelta(days=1), value=5)]),
+            IntervalHandler(intervals=[
+                Interval(TIME_ZERO, T_ZERO - timedelta(days=3), value=0),
+                Interval(T_ZERO - timedelta(days=3), T_ZERO - timedelta(days=1), value=10),
+                Interval(T_ZERO - timedelta(days=1), T_ZERO + timedelta(days=1), value=5),
+                Interval(T_ZERO + timedelta(days=1), T_ZERO + timedelta(days=3), value=10),
+            ]),
+            id="subtracting two IntervalHandlers. One is contained completely within the other."
+        ),
+        pytest.param(
+            operator.sub,
+            IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=10)]),
+            IntervalHandler(intervals=[Interval(T_ZERO + timedelta(days=1), T_ZERO + timedelta(days=5), value=5)]),
+            IntervalHandler(intervals=[
+                Interval(TIME_ZERO, T_ZERO - timedelta(days=3), value=0),
+                Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=1), value=10),
+                Interval(T_ZERO + timedelta(days=1), T_ZERO + timedelta(days=3), value=5),
+                Interval(T_ZERO + timedelta(days=3), T_ZERO + timedelta(days=5), value=-5),
+            ]),
+            id="subtracting two IntervalHandlers. One overlaps partially with the other."
+        ),
+        pytest.param(
+            operator.sub,
+            IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=10)]),
+            IntervalHandler(intervals=[Interval(T_ZERO + timedelta(days=3), T_ZERO + timedelta(days=5), value=5)]),
+            IntervalHandler(intervals=[
+                Interval(TIME_ZERO, T_ZERO - timedelta(days=3), value=0),
+                Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=10),
+                Interval(T_ZERO + timedelta(days=3), T_ZERO + timedelta(days=5), value=-5),
+            ]),
+            id="subtracting two IntervalHandlers. One is adjacent to the other."
+        ),
+        pytest.param(
+            operator.sub,
+            IntervalHandler(intervals=[Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=10)]),
+            IntervalHandler(intervals=[Interval(T_ZERO + timedelta(days=5), T_ZERO + timedelta(days=10), value=5)]),
+            IntervalHandler(intervals=[
+                Interval(TIME_ZERO, T_ZERO - timedelta(days=3), value=0),
+                Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=10),
+                Interval(T_ZERO + timedelta(days=3), T_ZERO + timedelta(days=5), value=0),
+                Interval(T_ZERO + timedelta(days=5), T_ZERO + timedelta(days=10), value=-5),
+            ]),
+            id="subtracting two IntervalHandlers. One is disjoint from the other."
+        ),
     ]
 )
 @pytest.mark.parametrize(
@@ -87,7 +136,8 @@ def test_operate(
     is_in_place: bool,
     expected: IntervalHandler,
 ) -> None:
-    if is_in_place and (in_place_operand := IN_PLACE_OPERAND_MAPPING.get(operand)):
+    if is_in_place:
+        in_place_operand = IN_PLACE_OPERAND_MAPPING[operand]
         method = getattr(a, f"__{in_place_operand.__name__}__")
         method(b)
         assert a == expected
