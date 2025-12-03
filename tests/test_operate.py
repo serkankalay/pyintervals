@@ -10,6 +10,11 @@ from pyintervals.interval_handler import _operate
 
 T_ZERO = datetime(2025, 1, 1)
 
+IN_PLACE_OPERAND_MAPPING = {
+    operator.add: operator.iadd,
+    operator.sub: operator.isub,
+}
+
 @pytest.mark.parametrize(
     "operand, a, b, expected",
     [
@@ -23,7 +28,7 @@ T_ZERO = datetime(2025, 1, 1)
                 Interval(T_ZERO - timedelta(days=1), T_ZERO + timedelta(days=1), value=15),
                 Interval(T_ZERO + timedelta(days=1), T_ZERO + timedelta(days=3), value=10),
             ]),
-            id="Adding two IntervalHandlers. One is contained completely within the other."
+            id="adding two IntervalHandlers. One is contained completely within the other."
         ),
         pytest.param(
             operator.add,
@@ -35,7 +40,7 @@ T_ZERO = datetime(2025, 1, 1)
                 Interval(T_ZERO + timedelta(days=1), T_ZERO + timedelta(days=3), value=15),
                 Interval(T_ZERO + timedelta(days=3), T_ZERO + timedelta(days=5), value=5),
             ]),
-            id="Adding two IntervalHandlers. One overlaps partially with the other."
+            id="adding two IntervalHandlers. One overlaps partially with the other."
         ),
         pytest.param(
             operator.add,
@@ -46,7 +51,7 @@ T_ZERO = datetime(2025, 1, 1)
                 Interval(T_ZERO - timedelta(days=3), T_ZERO + timedelta(days=3), value=10),
                 Interval(T_ZERO + timedelta(days=3), T_ZERO + timedelta(days=5), value=5),
             ]),
-            id="Adding two IntervalHandlers. One is adjacent to the other."
+            id="adding two IntervalHandlers. One is adjacent to the other."
         ),
         pytest.param(
             operator.add,
@@ -58,7 +63,20 @@ T_ZERO = datetime(2025, 1, 1)
                 Interval(T_ZERO + timedelta(days=3), T_ZERO + timedelta(days=5), value=0),
                 Interval(T_ZERO + timedelta(days=5), T_ZERO + timedelta(days=10), value=5),
             ]),
-            id="Adding two IntervalHandlers. One is disjoint from the other."
+            id="adding two IntervalHandlers. One is disjoint from the other."
+        ),
+    ]
+)
+@pytest.mark.parametrize(
+    "is_in_place",
+    [
+        pytest.param(
+            False,
+            id="Regular"
+        ),
+        pytest.param(
+            True,
+            id="In-place"
         ),
     ]
 )
@@ -66,7 +84,15 @@ def test_operate(
     operand: Callable[[float, float], float],
     a: IntervalHandler,
     b: IntervalHandler,
+    is_in_place: bool,
     expected: IntervalHandler,
 ) -> None:
-    result = _operate(a, b, operand)
-    assert result == expected
+    if is_in_place and (in_place_operand := IN_PLACE_OPERAND_MAPPING.get(operand)):
+        method = getattr(a, f"__{in_place_operand.__name__}__")
+        method(b)
+        assert a == expected
+    else:
+        method = getattr(a, f"__{operand.__name__}__")
+        result = method(b)
+        assert result == expected
+

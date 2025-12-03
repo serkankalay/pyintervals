@@ -55,6 +55,7 @@ def _operate(
     b: IntervalHandler,
     operand: Callable[[float, float], float],
 ) -> IntervalHandler:
+    """Only call this function through the methods bound to `IntervalHandler`."""
     if not isinstance(b, IntervalHandler):
         raise TypeError(
             f"unsupported operand type(s) for {operand.__name__}: "
@@ -145,13 +146,15 @@ class IntervalHandler:
         return _operate(self, other, operand=operator.add)
 
     def __iadd__(self, other: IntervalHandler) -> None:
-        return self.add(other.intervals)
+        simplified = _operate(self, other, operand=operator.add)
+        self.__init__(intervals=simplified.intervals, tz=self._tz)
 
     def __sub__(self, other: IntervalHandler) -> IntervalHandler:
         return _operate(self, other, operand=operator.sub)
 
     def __isub__(self, other: IntervalHandler) -> None:
-        return self.remove(other.intervals)
+        simplified = _operate(self, other, operand=operator.sub)
+        self.__init__(intervals=simplified.intervals, tz=self._tz)
 
     def __mul__(self, other: IntervalHandler) -> IntervalHandler:
         return _operate(self, other, operand=operator.mul)
@@ -172,6 +175,7 @@ class IntervalHandler:
         )
 
     def add(self, intervals: Iterable[Interval]) -> None:
+        """Adds without simplifying the intervals."""
         self.__intervals.extend(intervals)
         for interval in intervals:
             _make_range(self.__projection_graph, interval)
