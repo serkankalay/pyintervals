@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyintervals"
-version = "1.2.0"
+version = "1.2.1"
 description = "Efficient interval operations."
 authors = ["Serkan Kalay <serkanosmankalay@gmail.com>"]
 license = "MIT"

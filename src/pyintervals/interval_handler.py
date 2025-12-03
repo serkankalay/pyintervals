@@ -51,13 +51,13 @@ def _relevant_nodes(
     nodes: SortedList[TimeValueNode],
     interval: Interval,
 ) -> list[TimeValueNode]:
-    return list(
-        nodes.irange(
-            TimeValueNode(interval.start),
-            TimeValueNode(interval.end),
-            inclusive=(True, True),
+    return [
+        n
+        for n in nodes.islice(
+            start=nodes.index(_active_node_at_time(nodes, interval.start))
         )
-    )
+        if n.time_point < interval.end
+    ]
 
 
 def _area_during_interval(
