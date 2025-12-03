@@ -993,18 +993,16 @@ def test_operate(
 ) -> None:
     if is_in_place:
         in_place_operand = IN_PLACE_OPERAND_MAPPING[operand]
-        method = getattr(a, f"__{in_place_operand.__name__}__")
         if expected_error_type is not None:
             with pytest.raises(expected_error_type):
-                method(b)
+                in_place_operand(a, b)
         else:
-            method(b)
+            in_place_operand(a, b)
             assert a == expected
     else:
-        method = getattr(a, f"__{operand.__name__}__")
         if expected_error_type is not None:
             with pytest.raises(expected_error_type):
-                method(b)
+                operand(a, b)
         else:
-            result = method(b)
+            result = operand(a, b)
             assert result == expected
