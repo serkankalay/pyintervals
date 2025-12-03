@@ -3,7 +3,7 @@ from __future__ import annotations
 import operator
 from collections.abc import Callable
 from datetime import datetime, timedelta
-from typing import Union
+from typing import Any, Union
 
 import pytest
 
@@ -982,7 +982,7 @@ IN_PLACE_OPERAND_MAPPING = {
     ],
 )
 def test_operate(
-    operand: Callable[[float, float], float],
+    operand: Callable[[Any, Any], Any],
     a: IntervalHandler,
     b: IntervalHandler,
     expected_error_type: Union[type[Exception], None],
