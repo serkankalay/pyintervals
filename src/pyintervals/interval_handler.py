@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import itertools
+import operator
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Collection, Iterable, Sequence
+from typing import Callable, Collection, Iterable, Sequence, OrderedDict
 from zoneinfo import ZoneInfo
 
 from sortedcontainers import SortedList
@@ -48,6 +49,29 @@ def _make_range(
             nodes.add(new_node)
 
 
+def _operate(
+    a: IntervalHandler,
+    b: IntervalHandler | Sequence[Interval],
+    operator: Callable[[float, float], float],
+) -> IntervalHandler:
+    all_nodes = sorted(
+        n.time_point
+        for n in itertools.chain(a.projection_graph(), b.projection_graph())
+    )
+
+    return IntervalHandler(
+        intervals=[
+            Interval(
+                start=start,
+                end=end,
+                value=operator(a.value_at_time(start), b.value_at_time(start)),
+            )
+            for start, end in itertools.pairwise(all_nodes)
+        ],
+        tz=a._tz,
+    )
+
+
 def _relevant_nodes(
     nodes: SortedList[TimeValueNode],
     interval: Interval,
@@ -90,7 +114,7 @@ def _area_during_interval(
 class IntervalHandler:
     __intervals: list[Interval]
     __projection_graph: SortedList[TimeValueNode]
-    __tz: ZoneInfo | timezone | None
+    _tz: ZoneInfo | timezone | None
 
     def __init__(
         self,
@@ -105,7 +129,7 @@ class IntervalHandler:
         self.__projection_graph = SortedList(
             [TimeValueNode(time_point=TIME_ZERO.replace(tzinfo=tz))]
         )
-        self.__tz = tz
+        self._tz = tz
 
     @property
     def intervals(self) -> list[Interval]:
@@ -124,7 +148,7 @@ class IntervalHandler:
         )
 
         return IntervalHandler(
-            intervals=self.__intervals + intervals, tz=self.__tz
+            intervals=self.__intervals + intervals, tz=self._tz
         )
 
     def __iadd__(
@@ -150,13 +174,41 @@ class IntervalHandler:
                 Interval(interval.start, interval.end, value=-interval.value)
                 for interval in intervals
             ],
-            tz=self.__tz,
+            tz=self._tz,
         )
 
     def __isub__(
         self, other: IntervalHandler | Iterable[Interval]
     ) -> IntervalHandler:
         return other.__sub__(self)
+
+    def __mul__(
+        self, other: IntervalHandler | Iterable[Interval]
+    ) -> IntervalHandler:
+        if not isinstance(other, (IntervalHandler, Iterable)):
+            raise NotImplementedError(
+                f"Cannot multiply {type(other)} by IntervalHandler class."
+            )
+        return _operate(self, other, operator=operator.mul)
+
+    def __imul__(
+        self, other: IntervalHandler | Iterable[Interval]
+    ) -> IntervalHandler:
+        return other.__mul__(self)
+
+    def __truediv__(
+        self, other: IntervalHandler | Iterable[Interval]
+    ) -> IntervalHandler:
+        if not isinstance(other, (IntervalHandler, Iterable)):
+            raise NotImplementedError(
+                f"Cannot divide {type(other)} by IntervalHandler class."
+            )
+        return _operate(self, other, operator=operator.truediv)
+
+    def __itruediv__(
+        self, other: IntervalHandler | Iterable[Interval]
+    ) -> IntervalHandler:
+        return other.__itruediv__(self)
 
     def add(self, intervals: Iterable[Interval]) -> None:
         self.__intervals.extend(intervals)
