@@ -24,241 +24,735 @@ IN_PLACE_OPERAND_MAPPING = {
 @pytest.mark.parametrize(
     "operand, a, b, expected_error_type, expected",
     [
-        # pytest.param(
-        #     operator.add,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=5)]),
-        #     None,  # No error expected
-        #     IntervalHandler(intervals=[
-        #         Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
-        #         Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=15),
-        #     ]),
-        #     id="adding two IntervalHandlers. They both have the exact same domain."
-        # ),
-        # pytest.param(
-        #     operator.add,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=1), T_NOW + timedelta(days=1), value=5)]),
-        #     None,  # No error expected
-        #     IntervalHandler(intervals=[
-        #         Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
-        #         Interval(T_NOW - timedelta(days=3), T_NOW - timedelta(days=1), value=10),
-        #         Interval(T_NOW - timedelta(days=1), T_NOW + timedelta(days=1), value=15),
-        #         Interval(T_NOW + timedelta(days=1), T_NOW + timedelta(days=3), value=10),
-        #     ]),
-        #     id="adding two IntervalHandlers. One is contained completely within the other."
-        # ),
-        # pytest.param(
-        #     operator.add,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW + timedelta(days=1), T_NOW + timedelta(days=5), value=5)]),
-        #     None,  # No error expected
-        #     IntervalHandler(intervals=[
-        #         Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
-        #         Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=1), value=10),
-        #         Interval(T_NOW + timedelta(days=1), T_NOW + timedelta(days=3), value=15),
-        #         Interval(T_NOW + timedelta(days=3), T_NOW + timedelta(days=5), value=5),
-        #     ]),
-        #     id="adding two IntervalHandlers. One overlaps partially with the other."
-        # ),
-        # pytest.param(
-        #     operator.add,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW + timedelta(days=3), T_NOW + timedelta(days=5), value=5)]),
-        #     None,  # No error expected
-        #     IntervalHandler(intervals=[
-        #         Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
-        #         Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10),
-        #         Interval(T_NOW + timedelta(days=3), T_NOW + timedelta(days=5), value=5),
-        #     ]),
-        #     id="adding two IntervalHandlers. One is adjacent to the other."
-        # ),
-        # pytest.param(
-        #     operator.add,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW + timedelta(days=5), T_NOW + timedelta(days=10), value=5)]),
-        #     None,  # No error expected
-        #     IntervalHandler(intervals=[
-        #         Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
-        #         Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10),
-        #         Interval(T_NOW + timedelta(days=3), T_NOW + timedelta(days=5), value=0),
-        #         Interval(T_NOW + timedelta(days=5), T_NOW + timedelta(days=10), value=5),
-        #     ]),
-        #     id="adding two IntervalHandlers. One is disjoint from the other."
-        # ),
-        # pytest.param(
-        #     operator.sub,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=5)]),
-        #     None,  # No error expected
-        #     IntervalHandler(intervals=[
-        #         Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
-        #         Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=5),
-        #     ]),
-        #     id="subtracting two IntervalHandlers. They both have the exact same domain."
-        # ),
-        # pytest.param(
-        #     operator.sub,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=1), T_NOW + timedelta(days=1), value=5)]),
-        #     None,  # No error expected
-        #     IntervalHandler(intervals=[
-        #         Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
-        #         Interval(T_NOW - timedelta(days=3), T_NOW - timedelta(days=1), value=10),
-        #         Interval(T_NOW - timedelta(days=1), T_NOW + timedelta(days=1), value=5),
-        #         Interval(T_NOW + timedelta(days=1), T_NOW + timedelta(days=3), value=10),
-        #     ]),
-        #     id="subtracting two IntervalHandlers. One is contained completely within the other."
-        # ),
-        # pytest.param(
-        #     operator.sub,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW + timedelta(days=1), T_NOW + timedelta(days=5), value=5)]),
-        #     None,  # No error expected
-        #     IntervalHandler(intervals=[
-        #         Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
-        #         Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=1), value=10),
-        #         Interval(T_NOW + timedelta(days=1), T_NOW + timedelta(days=3), value=5),
-        #         Interval(T_NOW + timedelta(days=3), T_NOW + timedelta(days=5), value=-5),
-        #     ]),
-        #     id="subtracting two IntervalHandlers. One overlaps partially with the other."
-        # ),
-        # pytest.param(
-        #     operator.sub,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW + timedelta(days=3), T_NOW + timedelta(days=5), value=5)]),
-        #     None,  # No error expected
-        #     IntervalHandler(intervals=[
-        #         Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
-        #         Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10),
-        #         Interval(T_NOW + timedelta(days=3), T_NOW + timedelta(days=5), value=-5),
-        #     ]),
-        #     id="subtracting two IntervalHandlers. One is adjacent to the other."
-        # ),
-        # pytest.param(
-        #     operator.sub,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW + timedelta(days=5), T_NOW + timedelta(days=10), value=5)]),
-        #     None,  # No error expected
-        #     IntervalHandler(intervals=[
-        #         Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
-        #         Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10),
-        #         Interval(T_NOW + timedelta(days=3), T_NOW + timedelta(days=5), value=0),
-        #         Interval(T_NOW + timedelta(days=5), T_NOW + timedelta(days=10), value=-5),
-        #     ]),
-        #     id="subtracting two IntervalHandlers. One is disjoint from the other."
-        # ),
-        # pytest.param(
-        #     operator.mul,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=5)]),
-        #     None,  # No error expected
-        #     IntervalHandler(intervals=[
-        #         Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
-        #         Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=50),
-        #     ]),
-        #     id="multiplying two IntervalHandlers. They both have the exact same domain."
-        # ),
-        # pytest.param(
-        #     operator.mul,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=1), T_NOW + timedelta(days=1), value=5)]),
-        #     None,  # No error expected
-        #     IntervalHandler(intervals=[
-        #         Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
-        #         Interval(T_NOW - timedelta(days=3), T_NOW - timedelta(days=1), value=0),
-        #         Interval(T_NOW - timedelta(days=1), T_NOW + timedelta(days=1), value=50),
-        #         Interval(T_NOW + timedelta(days=1), T_NOW + timedelta(days=3), value=0),
-        #     ]),
-        #     id="multiplying two IntervalHandlers. One is contained completely within the other."
-        # ),
-        # pytest.param(
-        #     operator.mul,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW + timedelta(days=1), T_NOW + timedelta(days=5), value=5)]),
-        #     None,  # No error expected
-        #     IntervalHandler(intervals=[
-        #         Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
-        #         Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=1), value=0),
-        #         Interval(T_NOW + timedelta(days=1), T_NOW + timedelta(days=3), value=50),
-        #         Interval(T_NOW + timedelta(days=3), T_NOW + timedelta(days=5), value=0),
-        #     ]),
-        #     id="multiplying two IntervalHandlers. One overlaps partially with the other."
-        # ),
-        # pytest.param(
-        #     operator.mul,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW + timedelta(days=3), T_NOW + timedelta(days=5), value=5)]),
-        #     None,  # No error expected
-        #     IntervalHandler(intervals=[
-        #         Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
-        #         Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=0),
-        #         Interval(T_NOW + timedelta(days=3), T_NOW + timedelta(days=5), value=0),
-        #     ]),
-        #     id="multiplying two IntervalHandlers. One is adjacent to the other."
-        # ),
-        # pytest.param(
-        #     operator.mul,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW + timedelta(days=5), T_NOW + timedelta(days=10), value=5)]),
-        #     None,  # No error expected
-        #     IntervalHandler(intervals=[
-        #         Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
-        #         Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=0),
-        #         Interval(T_NOW + timedelta(days=3), T_NOW + timedelta(days=5), value=0),
-        #         Interval(T_NOW + timedelta(days=5), T_NOW + timedelta(days=10), value=0),
-        #     ]),
-        #     id="multiplying two IntervalHandlers. One is disjoint from the other."
-        # ),
-        # pytest.param(
-        #     operator.truediv,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=5)]),
-        #     ZeroDivisionError,
-        #     None,
-        #     id="dividing two IntervalHandlers. They both have the exact same domain. "
-        #     "Where the value of the denominator is zero, there will be a zero division error.",
-        # ),
-        # pytest.param(
-        #     operator.truediv,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=1), T_NOW + timedelta(days=1), value=5)]),
-        #     ZeroDivisionError,
-        #     None,
-        #     id="dividing two IntervalHandlers. One is contained completely within the other. "
-        #     "Where the intervals don't overlap and where the value of the denominator is zero, "
-        #     "there will be a zero division error.",
-        # ),
-        # pytest.param(
-        #     operator.truediv,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW + timedelta(days=1), T_NOW + timedelta(days=5), value=5)]),
-        #     ZeroDivisionError,
-        #     None,
-        #     id="dividing two IntervalHandlers. One is contained completely within the other. "
-        #     "Where the intervals don't overlap and where the value of the denominator is zero, "
-        #     "there will be a zero division error.",
-        # ),
-        # pytest.param(
-        #     operator.truediv,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW + timedelta(days=3), T_NOW + timedelta(days=5), value=5)]),
-        #     ZeroDivisionError,
-        #     None,
-        #     id="dividing two IntervalHandlers. One is contained completely within the other. "
-        #     "Where the intervals don't overlap and where the value of the denominator is zero, "
-        #     "there will be a zero division error.",
-        # ),
-        # pytest.param(
-        #     operator.truediv,
-        #     IntervalHandler(intervals=[Interval(T_NOW - timedelta(days=3), T_NOW + timedelta(days=3), value=10)]),
-        #     IntervalHandler(intervals=[Interval(T_NOW + timedelta(days=5), T_NOW + timedelta(days=10), value=5)]),
-        #     ZeroDivisionError,
-        #     None,
-        #     id="dividing two IntervalHandlers. One is contained completely within the other. "
-        #     "Where the intervals don't overlap and where the value of the denominator is zero, "
-        #     "there will be a zero division error.",
-        # ),
+        pytest.param(
+            operator.add,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=5,
+                    )
+                ]
+            ),
+            None,  # No error expected
+            IntervalHandler(
+                intervals=[
+                    Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=15,
+                    ),
+                ]
+            ),
+            id="adding two IntervalHandlers. They both have the exact same domain.",
+        ),
+        pytest.param(
+            operator.add,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=1),
+                        T_NOW + timedelta(days=1),
+                        value=5,
+                    )
+                ]
+            ),
+            None,  # No error expected
+            IntervalHandler(
+                intervals=[
+                    Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW - timedelta(days=1),
+                        value=10,
+                    ),
+                    Interval(
+                        T_NOW - timedelta(days=1),
+                        T_NOW + timedelta(days=1),
+                        value=15,
+                    ),
+                    Interval(
+                        T_NOW + timedelta(days=1),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    ),
+                ]
+            ),
+            id="adding two IntervalHandlers. One is contained completely within the other.",
+        ),
+        pytest.param(
+            operator.add,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW + timedelta(days=1),
+                        T_NOW + timedelta(days=5),
+                        value=5,
+                    )
+                ]
+            ),
+            None,  # No error expected
+            IntervalHandler(
+                intervals=[
+                    Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=1),
+                        value=10,
+                    ),
+                    Interval(
+                        T_NOW + timedelta(days=1),
+                        T_NOW + timedelta(days=3),
+                        value=15,
+                    ),
+                    Interval(
+                        T_NOW + timedelta(days=3),
+                        T_NOW + timedelta(days=5),
+                        value=5,
+                    ),
+                ]
+            ),
+            id="adding two IntervalHandlers. One overlaps partially with the other.",
+        ),
+        pytest.param(
+            operator.add,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW + timedelta(days=3),
+                        T_NOW + timedelta(days=5),
+                        value=5,
+                    )
+                ]
+            ),
+            None,  # No error expected
+            IntervalHandler(
+                intervals=[
+                    Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    ),
+                    Interval(
+                        T_NOW + timedelta(days=3),
+                        T_NOW + timedelta(days=5),
+                        value=5,
+                    ),
+                ]
+            ),
+            id="adding two IntervalHandlers. One is adjacent to the other.",
+        ),
+        pytest.param(
+            operator.add,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW + timedelta(days=5),
+                        T_NOW + timedelta(days=10),
+                        value=5,
+                    )
+                ]
+            ),
+            None,  # No error expected
+            IntervalHandler(
+                intervals=[
+                    Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    ),
+                    Interval(
+                        T_NOW + timedelta(days=3),
+                        T_NOW + timedelta(days=5),
+                        value=0,
+                    ),
+                    Interval(
+                        T_NOW + timedelta(days=5),
+                        T_NOW + timedelta(days=10),
+                        value=5,
+                    ),
+                ]
+            ),
+            id="adding two IntervalHandlers. One is disjoint from the other.",
+        ),
+        pytest.param(
+            operator.sub,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=5,
+                    )
+                ]
+            ),
+            None,  # No error expected
+            IntervalHandler(
+                intervals=[
+                    Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=5,
+                    ),
+                ]
+            ),
+            id="subtracting two IntervalHandlers. They both have the exact same domain.",
+        ),
+        pytest.param(
+            operator.sub,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=1),
+                        T_NOW + timedelta(days=1),
+                        value=5,
+                    )
+                ]
+            ),
+            None,  # No error expected
+            IntervalHandler(
+                intervals=[
+                    Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW - timedelta(days=1),
+                        value=10,
+                    ),
+                    Interval(
+                        T_NOW - timedelta(days=1),
+                        T_NOW + timedelta(days=1),
+                        value=5,
+                    ),
+                    Interval(
+                        T_NOW + timedelta(days=1),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    ),
+                ]
+            ),
+            id="subtracting two IntervalHandlers. One is contained completely within the other.",
+        ),
+        pytest.param(
+            operator.sub,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW + timedelta(days=1),
+                        T_NOW + timedelta(days=5),
+                        value=5,
+                    )
+                ]
+            ),
+            None,  # No error expected
+            IntervalHandler(
+                intervals=[
+                    Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=1),
+                        value=10,
+                    ),
+                    Interval(
+                        T_NOW + timedelta(days=1),
+                        T_NOW + timedelta(days=3),
+                        value=5,
+                    ),
+                    Interval(
+                        T_NOW + timedelta(days=3),
+                        T_NOW + timedelta(days=5),
+                        value=-5,
+                    ),
+                ]
+            ),
+            id="subtracting two IntervalHandlers. One overlaps partially with the other.",
+        ),
+        pytest.param(
+            operator.sub,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW + timedelta(days=3),
+                        T_NOW + timedelta(days=5),
+                        value=5,
+                    )
+                ]
+            ),
+            None,  # No error expected
+            IntervalHandler(
+                intervals=[
+                    Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    ),
+                    Interval(
+                        T_NOW + timedelta(days=3),
+                        T_NOW + timedelta(days=5),
+                        value=-5,
+                    ),
+                ]
+            ),
+            id="subtracting two IntervalHandlers. One is adjacent to the other.",
+        ),
+        pytest.param(
+            operator.sub,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW + timedelta(days=5),
+                        T_NOW + timedelta(days=10),
+                        value=5,
+                    )
+                ]
+            ),
+            None,  # No error expected
+            IntervalHandler(
+                intervals=[
+                    Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    ),
+                    Interval(
+                        T_NOW + timedelta(days=3),
+                        T_NOW + timedelta(days=5),
+                        value=0,
+                    ),
+                    Interval(
+                        T_NOW + timedelta(days=5),
+                        T_NOW + timedelta(days=10),
+                        value=-5,
+                    ),
+                ]
+            ),
+            id="subtracting two IntervalHandlers. One is disjoint from the other.",
+        ),
+        pytest.param(
+            operator.mul,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=5,
+                    )
+                ]
+            ),
+            None,  # No error expected
+            IntervalHandler(
+                intervals=[
+                    Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=50,
+                    ),
+                ]
+            ),
+            id="multiplying two IntervalHandlers. They both have the exact same domain.",
+        ),
+        pytest.param(
+            operator.mul,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=1),
+                        T_NOW + timedelta(days=1),
+                        value=5,
+                    )
+                ]
+            ),
+            None,  # No error expected
+            IntervalHandler(
+                intervals=[
+                    Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW - timedelta(days=1),
+                        value=0,
+                    ),
+                    Interval(
+                        T_NOW - timedelta(days=1),
+                        T_NOW + timedelta(days=1),
+                        value=50,
+                    ),
+                    Interval(
+                        T_NOW + timedelta(days=1),
+                        T_NOW + timedelta(days=3),
+                        value=0,
+                    ),
+                ]
+            ),
+            id="multiplying two IntervalHandlers. One is contained completely within the other.",
+        ),
+        pytest.param(
+            operator.mul,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW + timedelta(days=1),
+                        T_NOW + timedelta(days=5),
+                        value=5,
+                    )
+                ]
+            ),
+            None,  # No error expected
+            IntervalHandler(
+                intervals=[
+                    Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=1),
+                        value=0,
+                    ),
+                    Interval(
+                        T_NOW + timedelta(days=1),
+                        T_NOW + timedelta(days=3),
+                        value=50,
+                    ),
+                    Interval(
+                        T_NOW + timedelta(days=3),
+                        T_NOW + timedelta(days=5),
+                        value=0,
+                    ),
+                ]
+            ),
+            id="multiplying two IntervalHandlers. One overlaps partially with the other.",
+        ),
+        pytest.param(
+            operator.mul,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW + timedelta(days=3),
+                        T_NOW + timedelta(days=5),
+                        value=5,
+                    )
+                ]
+            ),
+            None,  # No error expected
+            IntervalHandler(
+                intervals=[
+                    Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=0,
+                    ),
+                    Interval(
+                        T_NOW + timedelta(days=3),
+                        T_NOW + timedelta(days=5),
+                        value=0,
+                    ),
+                ]
+            ),
+            id="multiplying two IntervalHandlers. One is adjacent to the other.",
+        ),
+        pytest.param(
+            operator.mul,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW + timedelta(days=5),
+                        T_NOW + timedelta(days=10),
+                        value=5,
+                    )
+                ]
+            ),
+            None,  # No error expected
+            IntervalHandler(
+                intervals=[
+                    Interval(TIME_ZERO, T_NOW - timedelta(days=3), value=0),
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=0,
+                    ),
+                    Interval(
+                        T_NOW + timedelta(days=3),
+                        T_NOW + timedelta(days=5),
+                        value=0,
+                    ),
+                    Interval(
+                        T_NOW + timedelta(days=5),
+                        T_NOW + timedelta(days=10),
+                        value=0,
+                    ),
+                ]
+            ),
+            id="multiplying two IntervalHandlers. One is disjoint from the other.",
+        ),
+        pytest.param(
+            operator.truediv,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=5,
+                    )
+                ]
+            ),
+            ZeroDivisionError,
+            None,
+            id="dividing two IntervalHandlers. They both have the exact same domain. "
+            "Where the value of the denominator is zero, there will be a zero division error.",
+        ),
+        pytest.param(
+            operator.truediv,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=1),
+                        T_NOW + timedelta(days=1),
+                        value=5,
+                    )
+                ]
+            ),
+            ZeroDivisionError,
+            None,
+            id="dividing two IntervalHandlers. One is contained completely within the other. "
+            "Where the intervals don't overlap and where the value of the denominator is zero, "
+            "there will be a zero division error.",
+        ),
+        pytest.param(
+            operator.truediv,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW + timedelta(days=1),
+                        T_NOW + timedelta(days=5),
+                        value=5,
+                    )
+                ]
+            ),
+            ZeroDivisionError,
+            None,
+            id="dividing two IntervalHandlers. One is contained completely within the other. "
+            "Where the intervals don't overlap and where the value of the denominator is zero, "
+            "there will be a zero division error.",
+        ),
+        pytest.param(
+            operator.truediv,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW + timedelta(days=3),
+                        T_NOW + timedelta(days=5),
+                        value=5,
+                    )
+                ]
+            ),
+            ZeroDivisionError,
+            None,
+            id="dividing two IntervalHandlers. One is contained completely within the other. "
+            "Where the intervals don't overlap and where the value of the denominator is zero, "
+            "there will be a zero division error.",
+        ),
+        pytest.param(
+            operator.truediv,
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW - timedelta(days=3),
+                        T_NOW + timedelta(days=3),
+                        value=10,
+                    )
+                ]
+            ),
+            IntervalHandler(
+                intervals=[
+                    Interval(
+                        T_NOW + timedelta(days=5),
+                        T_NOW + timedelta(days=10),
+                        value=5,
+                    )
+                ]
+            ),
+            ZeroDivisionError,
+            None,
+            id="dividing two IntervalHandlers. One is contained completely within the other. "
+            "Where the intervals don't overlap and where the value of the denominator is zero, "
+            "there will be a zero division error.",
+        ),
         pytest.param(
             operator.truediv,
             IntervalHandler(
