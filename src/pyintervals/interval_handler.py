@@ -3,13 +3,14 @@ from __future__ import annotations
 import itertools
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Collection, Iterable, Sequence
+from typing import Collection, Iterable
 from zoneinfo import ZoneInfo
 
+import more_itertools
 from sortedcontainers import SortedList
 
 from .constants import TIME_ZERO
-from .interval import Interval, contains_point, intersection
+from .interval import Interval
 from .search import weak_predecessor
 from .time_value_node import TimeValueNode, _simplify
 
@@ -80,7 +81,7 @@ def _area_during_interval(
     return sum(
         (
             during.value * start.value * (end.time_point - start.time_point)
-            for start, end in itertools.pairwise(relevant_nodes)
+            for start, end in more_itertools.pairwise(relevant_nodes)
         ),
         start=timedelta(0),
     )
