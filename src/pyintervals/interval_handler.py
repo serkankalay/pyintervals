@@ -23,25 +23,17 @@ def _to_new_node(
     if active_node is None:
         return TimeValueNode(time_point)
 
-    return (
-        TimeValueNode.clone(active_node, time_point)
-        if active_node.time_point < time_point
-        else None
-    )
+    return TimeValueNode.clone(active_node, time_point) if active_node.time_point < time_point else None
 
 
-def _active_node_at_time(
-    nodes: SortedList[TimeValueNode], when: datetime
-) -> TimeValueNode:
+def _active_node_at_time(nodes: SortedList[TimeValueNode], when: datetime) -> TimeValueNode:
     if node := weak_predecessor(nodes, TimeValueNode(when)):
         return node
     else:
         raise RuntimeError("Could not find active node at time.")
 
 
-def _make_range(
-    nodes: SortedList[TimeValueNode], new_interval: Interval
-) -> None:
+def _make_range(nodes: SortedList[TimeValueNode], new_interval: Interval) -> None:
     for t in {new_interval.start, new_interval.end}:
         if new_node := _to_new_node(
             active_node=_active_node_at_time(nodes, t),
@@ -88,9 +80,7 @@ def _relevant_nodes(
     else:
         return [
             n
-            for n in nodes.islice(
-                start=nodes.index(_active_node_at_time(nodes, interval.start))
-            )
+            for n in nodes.islice(start=nodes.index(_active_node_at_time(nodes, interval.start)))
             if n.time_point <= interval.end
         ]
 
@@ -138,9 +128,7 @@ class IntervalHandler:
 
     def _initialize(self, tz: ZoneInfo | timezone | None) -> None:
         self.__intervals = list()
-        self.__projection_graph = SortedList(
-            [TimeValueNode(time_point=TIME_ZERO.replace(tzinfo=tz))]
-        )
+        self.__projection_graph = SortedList([TimeValueNode(time_point=TIME_ZERO.replace(tzinfo=tz))])
         self._tz = tz
 
     @property
@@ -191,9 +179,7 @@ class IntervalHandler:
             for node in _relevant_nodes(self.__projection_graph, interval):
                 node._remove_interval(interval)
 
-        self.__projection_graph = SortedList(
-            _simplify(self.__projection_graph)
-        )
+        self.__projection_graph = SortedList(_simplify(self.__projection_graph))
 
     def projection_graph(self) -> SortedList[TimeValueNode]:
         return SortedList(self.__projection_graph)

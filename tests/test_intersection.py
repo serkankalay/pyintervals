@@ -100,12 +100,8 @@ def test_intersection(
     s_expected: str | None,
     e_expected: str | None,
 ) -> None:
-    interval1 = Interval(
-        datetime.fromisoformat(s1), datetime.fromisoformat(e1)
-    )
-    interval2 = Interval(
-        datetime.fromisoformat(s2), datetime.fromisoformat(e2)
-    )
+    interval1 = Interval(datetime.fromisoformat(s1), datetime.fromisoformat(e1))
+    interval2 = Interval(datetime.fromisoformat(s2), datetime.fromisoformat(e2))
 
     if s_expected is None or e_expected is None:
         assert intersection(interval1, interval2) is None
