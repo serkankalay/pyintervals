@@ -5,8 +5,11 @@ from functools import partial
 from typing import Iterable
 
 import pytest
+from sortedcontainers import SortedList
 
 from pyintervals import Interval
+from pyintervals.constants import TIME_ZERO
+from pyintervals.interval_handler import _relevant_nodes
 from pyintervals.time_value_node import TimeValueNode
 
 
@@ -288,3 +291,99 @@ def test_time_value_node_value(
     expected_value: float,
 ) -> None:
     assert _to_tvn(intervals).value == expected_value
+
+
+@pytest.mark.parametrize(
+    "nodes, interval, expected_node_count",
+    [
+        (
+            SortedList(
+                [TimeValueNode(time_point=TIME_ZERO.replace(tzinfo=None))]
+            ),
+            _normal_interval_with_value(value=0),
+            1,
+        ),
+        (
+            SortedList(
+                [
+                    TimeValueNode(time_point=TIME_ZERO),
+                    TimeValueNode(time_point=datetime(2024, 12, 1)),
+                    TimeValueNode(time_point=datetime(2025, 1, 2)),
+                    TimeValueNode(time_point=datetime(2025, 1, 4)),
+                ]
+            ),
+            Interval(start=datetime(2025, 1, 1), end=datetime(2025, 1, 5)),
+            3,
+        ),
+        (
+            SortedList(
+                [
+                    TimeValueNode(time_point=TIME_ZERO),
+                    TimeValueNode(time_point=datetime(2024, 12, 1)),
+                    TimeValueNode(time_point=datetime(2025, 1, 2)),
+                    TimeValueNode(time_point=datetime(2025, 1, 4)),
+                    TimeValueNode(time_point=datetime(2025, 1, 6)),
+                    TimeValueNode(time_point=datetime(2025, 1, 15)),
+                ]
+            ),
+            Interval(start=datetime(2025, 1, 2), end=datetime(2025, 1, 6)),
+            3,
+        ),
+        (
+            SortedList(
+                [
+                    TimeValueNode(time_point=TIME_ZERO),
+                    TimeValueNode(time_point=datetime(2024, 12, 1)),
+                    TimeValueNode(time_point=datetime(2025, 1, 2)),
+                    TimeValueNode(time_point=datetime(2025, 1, 4)),
+                ]
+            ),
+            Interval(start=datetime(2025, 1, 2), end=datetime(2025, 1, 5)),
+            2,
+        ),
+        (
+            SortedList(
+                [
+                    TimeValueNode(time_point=TIME_ZERO),
+                    TimeValueNode(time_point=datetime(2024, 12, 1)),
+                    TimeValueNode(time_point=datetime(2025, 1, 2)),
+                    TimeValueNode(time_point=datetime(2025, 1, 4)),
+                ]
+            ),
+            Interval(start=datetime(2025, 1, 2, 12), end=datetime(2025, 1, 5)),
+            2,
+        ),
+        (
+            SortedList(
+                [
+                    TimeValueNode(time_point=TIME_ZERO),
+                    TimeValueNode(time_point=datetime(2024, 12, 1)),
+                    TimeValueNode(time_point=datetime(2025, 1, 2)),
+                    TimeValueNode(time_point=datetime(2025, 1, 4)),
+                ]
+            ),
+            Interval(start=datetime(2025, 1, 4), end=datetime(2025, 1, 4)),
+            1,
+        ),
+        (
+            SortedList(
+                [
+                    TimeValueNode(time_point=TIME_ZERO),
+                    TimeValueNode(time_point=datetime(2024, 12, 1)),
+                    TimeValueNode(time_point=datetime(2025, 1, 2)),
+                    TimeValueNode(time_point=datetime(2025, 1, 4)),
+                ]
+            ),
+            Interval(
+                start=datetime(2025, 1, 4, 12), end=datetime(2025, 1, 10)
+            ),
+            1,
+        ),
+    ],
+)
+def test_relevant_nodes(
+    nodes,
+    interval,
+    expected_node_count,
+) -> None:
+    assert len(_relevant_nodes(nodes, interval)) == expected_node_count
