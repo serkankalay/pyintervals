@@ -322,6 +322,20 @@ def test_time_value_node_value(
                     TimeValueNode(time_point=datetime(2024, 12, 1)),
                     TimeValueNode(time_point=datetime(2025, 1, 2)),
                     TimeValueNode(time_point=datetime(2025, 1, 4)),
+                    TimeValueNode(time_point=datetime(2025, 1, 6)),
+                    TimeValueNode(time_point=datetime(2025, 1, 15)),
+                ]
+            ),
+            Interval(start=datetime(2025, 1, 2), end=datetime(2025, 1, 6)),
+            3,
+        ),
+        (
+            SortedList(
+                [
+                    TimeValueNode(time_point=TIME_ZERO),
+                    TimeValueNode(time_point=datetime(2024, 12, 1)),
+                    TimeValueNode(time_point=datetime(2025, 1, 2)),
+                    TimeValueNode(time_point=datetime(2025, 1, 4)),
                 ]
             ),
             Interval(start=datetime(2025, 1, 2), end=datetime(2025, 1, 5)),
@@ -349,7 +363,7 @@ def test_time_value_node_value(
                 ]
             ),
             Interval(start=datetime(2025, 1, 4), end=datetime(2025, 1, 4)),
-            0,
+            1,
         ),
         (
             SortedList(
