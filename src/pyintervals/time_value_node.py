@@ -16,12 +16,8 @@ from pyintervals.interval import contains_point
 class TimeValueNode:
     time_point: datetime
     __intervals: SortedList[Interval] = field(default_factory=SortedList)
-    __starting_intervals: SortedList[Interval] = field(
-        default_factory=SortedList
-    )
-    __ending_intervals: SortedList[Interval] = field(
-        default_factory=SortedList
-    )
+    __starting_intervals: SortedList[Interval] = field(default_factory=SortedList)
+    __ending_intervals: SortedList[Interval] = field(default_factory=SortedList)
 
     @property
     def intervals(self) -> list[Interval]:
@@ -40,19 +36,12 @@ class TimeValueNode:
         return sum(i.value for i in self.__intervals if not i.is_degenerate())
 
     def is_redundant(self) -> bool:
-        return (
-            self.time_point > TIME_ZERO
-            and not self.__starting_intervals
-            and not self.__ending_intervals
-        )
+        return self.time_point > TIME_ZERO and not self.__starting_intervals and not self.__ending_intervals
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, TimeValueNode):
             raise NotImplementedError
-        return (
-            self.time_point == other.time_point
-            and self.__intervals == other.__intervals
-        )
+        return self.time_point == other.time_point and self.__intervals == other.__intervals
 
     def __ne__(self, other: object) -> bool:
         return not (self == other)
@@ -97,9 +86,7 @@ class TimeValueNode:
             self.__ending_intervals.remove(interval)
 
     @staticmethod
-    def clone(
-        given: TimeValueNode, to_time: datetime | None = None
-    ) -> TimeValueNode:
+    def clone(given: TimeValueNode, to_time: datetime | None = None) -> TimeValueNode:
         return (
             TimeValueNode(given.time_point, SortedList(given.__intervals))
             if not to_time

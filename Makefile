@@ -23,7 +23,7 @@ mypy:
 
 .PHONY: flake8
 flake8:
-	poetry run flake8 $(modules)
+	poetry run flake8 $(modules) --max-line-length=120
 
 .PHONY: format-check
 format-check:
