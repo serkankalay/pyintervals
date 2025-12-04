@@ -128,32 +128,36 @@ class IntervalHandler:
 
     def __iadd__(self, other: IntervalHandler) -> None:
         simplified = _operate(self, other, operand=operator.add)
-        self.__init__(intervals=simplified.intervals, tz=self._tz)  # type: ignore[misc]
-        return
+        self._initialize(tz=self._tz)
+        self.add(intervals=simplified.intervals)
+        return None
 
     def __sub__(self, other: IntervalHandler) -> IntervalHandler:
         return _operate(self, other, operand=operator.sub)
 
     def __isub__(self, other: IntervalHandler) -> None:
         simplified = _operate(self, other, operand=operator.sub)
-        self.__init__(intervals=simplified.intervals, tz=self._tz)  # type: ignore[misc]
-        return
+        self._initialize(tz=self._tz)
+        self.add(intervals=simplified.intervals)
+        return None
 
     def __mul__(self, other: IntervalHandler) -> IntervalHandler:
         return _operate(self, other, operand=operator.mul)
 
-    def __imul__(self, other: IntervalHandler) -> IntervalHandler:
+    def __imul__(self, other: IntervalHandler) -> None:
         simplified = _operate(self, other, operand=operator.mul)
-        self.__init__(intervals=simplified.intervals, tz=self._tz)  # type: ignore[misc]
-        return
+        self._initialize(tz=self._tz)
+        self.add(intervals=simplified.intervals)
+        return None
 
     def __truediv__(self, other: IntervalHandler) -> IntervalHandler:
         return _operate(self, other, operand=operator.truediv)
 
-    def __itruediv__(self, other: IntervalHandler) -> IntervalHandler:
+    def __itruediv__(self, other: IntervalHandler) -> None:
         simplified = _operate(self, other, operand=operator.truediv)
-        self.__init__(intervals=simplified.intervals, tz=self._tz)  # type: ignore[misc]
-        return
+        self._initialize(tz=self._tz)
+        self.add(intervals=simplified.intervals)
+        return None
 
     def add(self, intervals: Iterable[Interval]) -> None:
         """Adds without simplifying the intervals."""
