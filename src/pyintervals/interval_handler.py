@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import itertools
+import operator
+from collections.abc import Callable, Collection, Iterable
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-from typing import Collection, Iterable
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import more_itertools
@@ -39,6 +40,29 @@ def _make_range(nodes: SortedList[TimeValueNode], new_interval: Interval) -> Non
             time_point=t,
         ):
             nodes.add(new_node)
+
+
+def _operate(
+    a: IntervalHandler,
+    b: IntervalHandler,
+    operand: Callable[[float, float], float],
+) -> IntervalHandler:
+    """Only call this function through the methods bound to `IntervalHandler`."""
+    if not isinstance(b, IntervalHandler):
+        raise TypeError(f"unsupported operand type(s) for {operand.__name__}: " f"'{type(a)}' and '{type(b)}'")
+    change_times = set(n.time_point for n in itertools.chain(a.projection_graph(), b.projection_graph()))
+
+    return IntervalHandler(
+        intervals=[
+            Interval(
+                start=start,
+                end=end,
+                value=operand(a.value_at_time(start), b.value_at_time(start)),
+            )
+            for start, end in more_itertools.pairwise(sorted(change_times))
+        ],
+        tz=a._tz,
+    )
 
 
 def _relevant_nodes(
@@ -80,20 +104,63 @@ def _area_during_interval(handler: IntervalHandler, during: Interval) -> timedel
 class IntervalHandler:
     __intervals: list[Interval]
     __projection_graph: SortedList[TimeValueNode]
+    _tz: ZoneInfo | timezone | None
 
-    def __init__(self, intervals: Iterable[Interval] = [], tz: ZoneInfo | None = None):
+    def __init__(
+        self,
+        intervals: Iterable[Interval] = [],
+        tz: ZoneInfo | timezone | None = None,
+    ):
         self._initialize(tz)
         self.add(intervals)
 
-    def _initialize(self, tz: ZoneInfo | None) -> None:
+    def _initialize(self, tz: ZoneInfo | timezone | None) -> None:
         self.__intervals = list()
         self.__projection_graph = SortedList([TimeValueNode(time_point=TIME_ZERO.replace(tzinfo=tz))])
+        self._tz = tz
 
     @property
     def intervals(self) -> list[Interval]:
         return list(self.__intervals)
 
+    def __add__(self, other: IntervalHandler) -> IntervalHandler:
+        return _operate(self, other, operand=operator.add)
+
+    def __iadd__(self, other: IntervalHandler) -> None:
+        simplified = _operate(self, other, operand=operator.add)
+        self._initialize(tz=self._tz)
+        self.add(intervals=simplified.intervals)
+        return None
+
+    def __sub__(self, other: IntervalHandler) -> IntervalHandler:
+        return _operate(self, other, operand=operator.sub)
+
+    def __isub__(self, other: IntervalHandler) -> None:
+        simplified = _operate(self, other, operand=operator.sub)
+        self._initialize(tz=self._tz)
+        self.add(intervals=simplified.intervals)
+        return None
+
+    def __mul__(self, other: IntervalHandler) -> IntervalHandler:
+        return _operate(self, other, operand=operator.mul)
+
+    def __imul__(self, other: IntervalHandler) -> None:
+        simplified = _operate(self, other, operand=operator.mul)
+        self._initialize(tz=self._tz)
+        self.add(intervals=simplified.intervals)
+        return None
+
+    def __truediv__(self, other: IntervalHandler) -> IntervalHandler:
+        return _operate(self, other, operand=operator.truediv)
+
+    def __itruediv__(self, other: IntervalHandler) -> None:
+        simplified = _operate(self, other, operand=operator.truediv)
+        self._initialize(tz=self._tz)
+        self.add(intervals=simplified.intervals)
+        return None
+
     def add(self, intervals: Iterable[Interval]) -> None:
+        """Adds without simplifying the intervals."""
         self.__intervals.extend(intervals)
         for interval in intervals:
             _make_range(self.__projection_graph, interval)
@@ -101,6 +168,7 @@ class IntervalHandler:
                 node._add_interval(interval)
 
     def remove(self, intervals: Collection[Interval]) -> None:
+        """Removes without simplifying the intervals."""
         self.__intervals = [i for i in self.__intervals if i not in intervals]
 
         for interval in intervals:
