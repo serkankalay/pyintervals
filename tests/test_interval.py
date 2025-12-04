@@ -114,6 +114,8 @@ def test_contains_point(interval, point, answer):
             ],
             Interval(datetime(2023, 1, 1, 12), datetime(2023, 1, 3, 12), value=2.5),
             2 * 2.5 * timedelta(hours=12) + 3 * 2.5 * timedelta(days=1) + 4 * 2.5 * timedelta(hours=12),
+            id="Area calculation of three adjacent intervals, during an interval with a value of `2.5`. "
+            "The interval spans one interval completely, and the others partially.",
         ),
         pytest.param(
             [
@@ -123,6 +125,19 @@ def test_contains_point(interval, point, answer):
             ],
             Interval(datetime(2023, 1, 1), datetime(2023, 1, 2), value=2.5),
             2 * 2.5 * timedelta(days=1) + 3 * 2.5 * timedelta(days=1) + 4 * 2.5 * timedelta(hours=0),
+            id="Area calculation of three overlapping intervals, during an interval with a value of `2.5`. "
+            "The interval spans all intervals completely. One of the intervals is degenerate.",
+        ),
+        pytest.param(
+            [
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 2), value=2),
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 2), value=3),
+                Interval(datetime(2023, 1, 1, 12), datetime(2023, 1, 1, 12), value=4),
+            ],
+            Interval(datetime(2023, 1, 1, 12), datetime(2023, 1, 1, 12), value=2.5),
+            timedelta(hours=0),
+            id="Area calculation of three overlapping intervals, during a degenerate interval with a value of `2.5`. "
+            "Because the interval during which we calculate the area is degenerate, the area is zero.",
         ),
     ],
 )
