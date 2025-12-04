@@ -55,15 +55,9 @@ def _relevant_nodes(
         ]
 
 
-def _area_during_interval(
-    handler: IntervalHandler, during: Interval
-) -> timedelta:
-    first_node_in_interval = TimeValueNode.clone(
-        handler.node_at_time(during.start), during.start
-    )
-    last_node_in_interval = TimeValueNode.clone(
-        handler.node_at_time(during.end), during.end
-    )
+def _area_during_interval(handler: IntervalHandler, during: Interval) -> timedelta:
+    first_node_in_interval = TimeValueNode.clone(handler.node_at_time(during.start), during.start)
+    last_node_in_interval = TimeValueNode.clone(handler.node_at_time(during.end), during.end)
 
     relevant_nodes = itertools.chain(
         [first_node_in_interval],
