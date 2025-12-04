@@ -112,25 +112,17 @@ def test_contains_point(interval, point, answer):
                 Interval(datetime(2023, 1, 2), datetime(2023, 1, 3), value=3),
                 Interval(datetime(2023, 1, 3), datetime(2023, 1, 4), value=4),
             ],
-            Interval(
-                datetime(2023, 1, 1, 12), datetime(2023, 1, 3, 12), value=2.5
-            ),
-            2 * 2.5 * timedelta(hours=12)
-            + 3 * 2.5 * timedelta(days=1)
-            + 4 * 2.5 * timedelta(hours=12),
+            Interval(datetime(2023, 1, 1, 12), datetime(2023, 1, 3, 12), value=2.5),
+            2 * 2.5 * timedelta(hours=12) + 3 * 2.5 * timedelta(days=1) + 4 * 2.5 * timedelta(hours=12),
         ),
         pytest.param(
             [
                 Interval(datetime(2023, 1, 1), datetime(2023, 1, 2), value=2),
                 Interval(datetime(2023, 1, 1), datetime(2023, 1, 2), value=3),
-                Interval(
-                    datetime(2023, 1, 1, 12), datetime(2023, 1, 1, 12), value=4
-                ),
+                Interval(datetime(2023, 1, 1, 12), datetime(2023, 1, 1, 12), value=4),
             ],
             Interval(datetime(2023, 1, 1), datetime(2023, 1, 2), value=2.5),
-            2 * 2.5 * timedelta(days=1)
-            + 3 * 2.5 * timedelta(days=1)
-            + 4 * 2.5 * timedelta(hours=0),
+            2 * 2.5 * timedelta(days=1) + 3 * 2.5 * timedelta(days=1) + 4 * 2.5 * timedelta(hours=0),
         ),
     ],
 )

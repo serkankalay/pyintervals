@@ -13,9 +13,7 @@ from pyintervals.interval_handler import _relevant_nodes
 from pyintervals.time_value_node import TimeValueNode
 
 
-def _tvn_with_intervals(
-    tvn: TimeValueNode, intervals: Iterable[Interval]
-) -> TimeValueNode:
+def _tvn_with_intervals(tvn: TimeValueNode, intervals: Iterable[Interval]) -> TimeValueNode:
     for interval in intervals:
         tvn._add_interval(interval)
     return tvn
@@ -162,9 +160,7 @@ def test_time_value_node_comparison(
         (
             _tvn_with_intervals(
                 TimeValueNode(datetime(1975, 1, 1)),
-                intervals=[
-                    Interval(datetime(1970, 1, 1), datetime(2000, 1, 1))
-                ],
+                intervals=[Interval(datetime(1970, 1, 1), datetime(2000, 1, 1))],
             ),
             None,
         ),
@@ -172,9 +168,7 @@ def test_time_value_node_comparison(
         (
             _tvn_with_intervals(
                 TimeValueNode(datetime(1975, 1, 1)),
-                intervals=[
-                    Interval(datetime(1975, 1, 1), datetime(1975, 1, 1))
-                ],
+                intervals=[Interval(datetime(1975, 1, 1), datetime(1975, 1, 1))],
             ),
             None,
         ),
@@ -182,9 +176,7 @@ def test_time_value_node_comparison(
         (
             _tvn_with_intervals(
                 TimeValueNode(datetime(1975, 1, 1)),
-                intervals=[
-                    Interval(datetime(1970, 1, 1), datetime(2000, 1, 1))
-                ],
+                intervals=[Interval(datetime(1970, 1, 1), datetime(2000, 1, 1))],
             ),
             datetime(2014, 9, 12),
         ),
@@ -192,17 +184,13 @@ def test_time_value_node_comparison(
         (
             _tvn_with_intervals(
                 TimeValueNode(datetime(1975, 1, 1)),
-                intervals=[
-                    Interval(datetime(1975, 1, 1), datetime(1975, 1, 1))
-                ],
+                intervals=[Interval(datetime(1975, 1, 1), datetime(1975, 1, 1))],
             ),
             datetime(1976, 1, 1),
         ),
     ],
 )
-def test_clone_time_value_node(
-    tvn: TimeValueNode, to_time: datetime | None
-) -> None:
+def test_clone_time_value_node(tvn: TimeValueNode, to_time: datetime | None) -> None:
     to_compare = (
         tvn
         if to_time is None
@@ -297,9 +285,7 @@ def test_time_value_node_value(
     "nodes, interval, expected_node_count",
     [
         (
-            SortedList(
-                [TimeValueNode(time_point=TIME_ZERO.replace(tzinfo=None))]
-            ),
+            SortedList([TimeValueNode(time_point=TIME_ZERO.replace(tzinfo=None))]),
             _normal_interval_with_value(value=0),
             1,
         ),
@@ -374,9 +360,7 @@ def test_time_value_node_value(
                     TimeValueNode(time_point=datetime(2025, 1, 4)),
                 ]
             ),
-            Interval(
-                start=datetime(2025, 1, 4, 12), end=datetime(2025, 1, 10)
-            ),
+            Interval(start=datetime(2025, 1, 4, 12), end=datetime(2025, 1, 10)),
             1,
         ),
     ],
