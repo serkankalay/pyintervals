@@ -185,17 +185,13 @@ class IntervalHandler:
     def clone(self) -> IntervalHandler:
         cloned = IntervalHandler(tz=self._tz)
         cloned.__intervals = list(self.__intervals)
-        cloned.__projection_graph = SortedList(
-            TimeValueNode.clone(given=node)
-            for node in self.__projection_graph
-        )
+        cloned.__projection_graph = SortedList(TimeValueNode.clone(given=node) for node in self.__projection_graph)
         cloned.__first_negative = (
             None
             if self.__first_negative is None
             else cloned.__projection_graph[self.__projection_graph.index(self.__first_negative)]
         )
         return cloned
-
 
     def _try_refresh_first_negative_point(self, node: TimeValueNode) -> None:
         if node.value < 0:

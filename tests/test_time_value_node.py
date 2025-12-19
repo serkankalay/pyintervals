@@ -452,8 +452,7 @@ def test_clone_preserves_starting_and_ending_intervals(
 
     # Verify intervals are cloned
     assert cloned.intervals == original.intervals, (
-        f"Intervals mismatch for {test_id}: "
-        f"original={original.intervals}, cloned={cloned.intervals}"
+        f"Intervals mismatch for {test_id}: " f"original={original.intervals}, cloned={cloned.intervals}"
     )
 
     # Verify starting_intervals are cloned
@@ -470,15 +469,15 @@ def test_clone_preserves_starting_and_ending_intervals(
 
     # Verify cloned lists are independent (same objects, but different containers)
     # The intervals themselves should be the same objects, but the lists should be different
-    assert cloned.intervals is not original.intervals, (
-        f"Cloned intervals list should be a different object for {test_id}"
-    )
-    assert cloned.starting_intervals is not original.starting_intervals, (
-        f"Cloned starting_intervals list should be a different object for {test_id}"
-    )
-    assert cloned.ending_intervals is not original.ending_intervals, (
-        f"Cloned ending_intervals list should be a different object for {test_id}"
-    )
+    assert (
+        cloned.intervals is not original.intervals
+    ), f"Cloned intervals list should be a different object for {test_id}"
+    assert (
+        cloned.starting_intervals is not original.starting_intervals
+    ), f"Cloned starting_intervals list should be a different object for {test_id}"
+    assert (
+        cloned.ending_intervals is not original.ending_intervals
+    ), f"Cloned ending_intervals list should be a different object for {test_id}"
 
 
 @pytest.mark.parametrize(
@@ -535,7 +534,7 @@ def test_copy_recalculates_starting_and_ending_intervals(
     expected_starting: list[Interval],
     expected_ending: list[Interval],
 ) -> None:
-    """Test that TimeValueNode.clone with to_time recalculates starting_intervals and ending_intervals based on new time_point."""
+    """Test that TimeValueNode.clone with to_time recalculates starting_intervals and ending_intervals ."""
     original = TimeValueNode(time_point=time_point)
     for interval in intervals:
         original._add_interval(interval)
@@ -545,11 +544,9 @@ def test_copy_recalculates_starting_and_ending_intervals(
     # When cloning with to_time, starting_intervals and ending_intervals should be recalculated
     # based on the new time_point (to_time), not preserved from the original
     assert cloned.starting_intervals == expected_starting, (
-        f"Starting intervals mismatch for {test_id}: "
-        f"expected={expected_starting}, got={cloned.starting_intervals}"
+        f"Starting intervals mismatch for {test_id}: " f"expected={expected_starting}, got={cloned.starting_intervals}"
     )
 
     assert cloned.ending_intervals == expected_ending, (
-        f"Ending intervals mismatch for {test_id}: "
-        f"expected={expected_ending}, got={cloned.ending_intervals}"
+        f"Ending intervals mismatch for {test_id}: " f"expected={expected_ending}, got={cloned.ending_intervals}"
     )

@@ -1051,9 +1051,9 @@ def test_clone_basic(test_id: str, intervals: list[Interval], tz: None) -> None:
     assert cloned.intervals == handler.intervals, f"Intervals mismatch for {test_id}"
 
     # Clone should have same projection graph structure
-    assert len(cloned.projection_graph) == len(handler.projection_graph), (
-        f"Projection graph length mismatch for {test_id}"
-    )
+    assert len(cloned.projection_graph) == len(
+        handler.projection_graph
+    ), f"Projection graph length mismatch for {test_id}"
     assert [n.time_point for n in cloned.projection_graph] == [
         n.time_point for n in handler.projection_graph
     ], f"Projection graph time points mismatch for {test_id}"
@@ -1063,12 +1063,12 @@ def test_clone_basic(test_id: str, intervals: list[Interval], tz: None) -> None:
         assert cloned.first_negative_point is None, f"Expected None first_negative_point for {test_id}"
     else:
         assert cloned.first_negative_point is not None, f"Expected non-None first_negative_point for {test_id}"
-        assert cloned.first_negative_point.time_point == handler.first_negative_point.time_point, (
-            f"First negative point time mismatch for {test_id}"
-        )
-        assert cloned.first_negative_point.value == handler.first_negative_point.value, (
-            f"First negative point value mismatch for {test_id}"
-        )
+        assert (
+            cloned.first_negative_point.time_point == handler.first_negative_point.time_point
+        ), f"First negative point time mismatch for {test_id}"
+        assert (
+            cloned.first_negative_point.value == handler.first_negative_point.value
+        ), f"First negative point value mismatch for {test_id}"
 
     # Clone should have same timezone
     assert cloned._tz == handler._tz, f"Timezone mismatch for {test_id}"
@@ -1122,42 +1122,42 @@ def test_clone_independence(test_id: str, intervals: list[Interval]) -> None:
     if "add_to_original" in test_id:
         # Add to original, clone should be unaffected
         handler.add([Interval(datetime(2024, 1, 1), datetime(2024, 1, 10), value=10)])
-        assert len(handler.intervals) == original_intervals_count + 1, (
-            f"Original intervals count should increase for {test_id}"
-        )
-        assert len(cloned.intervals) == cloned_intervals_count, (
-            f"Cloned intervals count should remain unchanged for {test_id}"
-        )
+        assert (
+            len(handler.intervals) == original_intervals_count + 1
+        ), f"Original intervals count should increase for {test_id}"
+        assert (
+            len(cloned.intervals) == cloned_intervals_count
+        ), f"Cloned intervals count should remain unchanged for {test_id}"
     elif "remove_from_original" in test_id:
         # Remove from original, clone should be unaffected
         to_remove = handler.intervals[0]
         handler.remove([to_remove])
-        assert len(handler.intervals) == original_intervals_count - 1, (
-            f"Original intervals count should decrease for {test_id}"
-        )
-        assert len(cloned.intervals) == cloned_intervals_count, (
-            f"Cloned intervals count should remain unchanged for {test_id}"
-        )
+        assert (
+            len(handler.intervals) == original_intervals_count - 1
+        ), f"Original intervals count should decrease for {test_id}"
+        assert (
+            len(cloned.intervals) == cloned_intervals_count
+        ), f"Cloned intervals count should remain unchanged for {test_id}"
         assert to_remove in cloned.intervals, f"Removed interval should still be in clone for {test_id}"
     elif "add_to_clone" in test_id:
         # Add to clone, original should be unaffected
         cloned.add([Interval(datetime(2024, 1, 1), datetime(2024, 1, 10), value=10)])
-        assert len(cloned.intervals) == cloned_intervals_count + 1, (
-            f"Cloned intervals count should increase for {test_id}"
-        )
-        assert len(handler.intervals) == original_intervals_count, (
-            f"Original intervals count should remain unchanged for {test_id}"
-        )
+        assert (
+            len(cloned.intervals) == cloned_intervals_count + 1
+        ), f"Cloned intervals count should increase for {test_id}"
+        assert (
+            len(handler.intervals) == original_intervals_count
+        ), f"Original intervals count should remain unchanged for {test_id}"
     elif "remove_from_clone" in test_id:
         # Remove from clone, original should be unaffected
         to_remove = cloned.intervals[0]
         cloned.remove([to_remove])
-        assert len(cloned.intervals) == cloned_intervals_count - 1, (
-            f"Cloned intervals count should decrease for {test_id}"
-        )
-        assert len(handler.intervals) == original_intervals_count, (
-            f"Original intervals count should remain unchanged for {test_id}"
-        )
+        assert (
+            len(cloned.intervals) == cloned_intervals_count - 1
+        ), f"Cloned intervals count should decrease for {test_id}"
+        assert (
+            len(handler.intervals) == original_intervals_count
+        ), f"Original intervals count should remain unchanged for {test_id}"
         assert to_remove in handler.intervals, f"Removed interval should still be in original for {test_id}"
 
 
@@ -1197,9 +1197,7 @@ def test_clone_independence(test_id: str, intervals: list[Interval]) -> None:
         "clone_preserves_node_values",
     ],
 )
-def test_clone_preserves_values(
-    test_id: str, intervals: list[Interval], test_times: list[datetime]
-) -> None:
+def test_clone_preserves_values(test_id: str, intervals: list[Interval], test_times: list[datetime]) -> None:
     """Test that clone preserves node values at various time points."""
     handler = IntervalHandler(intervals=intervals)
     cloned = handler.clone()
@@ -1210,8 +1208,7 @@ def test_clone_preserves_values(
             original_value = handler.value_at_time(time_point)
             cloned_value = cloned.value_at_time(time_point)
             assert original_value == cloned_value, (
-                f"Value mismatch at {time_point} for {test_id}: "
-                f"original={original_value}, cloned={cloned_value}"
+                f"Value mismatch at {time_point} for {test_id}: " f"original={original_value}, cloned={cloned_value}"
             )
         except RuntimeError:
             # If time point is out of range, both should fail
