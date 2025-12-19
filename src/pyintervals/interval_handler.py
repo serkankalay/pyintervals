@@ -50,7 +50,7 @@ def _operate(
     """Only call this function through the methods bound to `IntervalHandler`."""
     if not isinstance(b, IntervalHandler):
         raise TypeError(f"unsupported operand type(s) for {operand.__name__}: " f"'{type(a)}' and '{type(b)}'")
-    change_times = set(n.time_point for n in itertools.chain(a.projection_graph(), b.projection_graph()))
+    change_times = set(n.time_point for n in itertools.chain(a.projection_graph, b.projection_graph))
 
     return IntervalHandler(
         intervals=[
@@ -87,7 +87,7 @@ def _area_during_interval(handler: IntervalHandler, during: Interval) -> timedel
         [first_node_in_interval],
         # ↓ Everything except the first node, since it's not ↓
         # ↓ necessarily part of the interval ↓
-        _relevant_nodes(handler.projection_graph(), during)[1:],
+        _relevant_nodes(handler.projection_graph, during)[1:],
         [last_node_in_interval],
     )
 
@@ -190,6 +190,7 @@ class IntervalHandler:
         if self.__first_negative and self.__first_negative.value >= 0:
             self.__first_negative = None
 
+    @property
     def projection_graph(self) -> SortedList[TimeValueNode]:
         return SortedList(self.__projection_graph)
 
@@ -202,5 +203,6 @@ class IntervalHandler:
     def get_area(self, during: Interval) -> timedelta:
         return _area_during_interval(self, during)
 
+    @property
     def first_negative_point(self) -> TimeValueNode | None:
         return self.__first_negative

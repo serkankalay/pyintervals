@@ -187,10 +187,10 @@ def test_interval_handler_with_intervals(
 ) -> None:
     handler = IntervalHandler(intervals=intervals)
     assert len(handler.intervals) == n_expected_intervals
-    assert len(handler.projection_graph()) == n_expected_tvn
-    assert [tvn.time_point for tvn in handler.projection_graph()] == expected_tvn_time_points
+    assert len(handler.projection_graph) == n_expected_tvn
+    assert [tvn.time_point for tvn in handler.projection_graph] == expected_tvn_time_points
     for interval in intervals:
-        for node in handler.projection_graph():
+        for node in handler.projection_graph:
             if contains_point(interval, node.time_point):
                 assert interval in node.intervals
 
@@ -414,10 +414,10 @@ def test_node_and_value_at_time(time_point, n_expected_intervals, expected_value
 )
 def test_remove_intervals_detailed(intervals: list[Interval], n_expected_tvn_reduction) -> None:
     handler = _complex_interval_handler()
-    original_tvn_count = len(handler.projection_graph())
+    original_tvn_count = len(handler.projection_graph)
     handler.remove(intervals)
-    assert len(handler.projection_graph()) == (original_tvn_count - n_expected_tvn_reduction)
-    assert not any(interval in node.intervals for node in handler.projection_graph() for interval in intervals)
+    assert len(handler.projection_graph) == (original_tvn_count - n_expected_tvn_reduction)
+    assert not any(interval in node.intervals for node in handler.projection_graph for interval in intervals)
 
 
 @pytest.mark.parametrize(
@@ -531,7 +531,7 @@ def test_first_negative_point(
 ) -> None:
     """Test first_negative_point method of IntervalHandler."""
     handler = IntervalHandler(intervals=intervals)
-    first_negative = handler.first_negative_point()
+    first_negative = handler.first_negative_point
 
     if expected_time_point is None:
         if test_id == "degenerate_negative_interval":
@@ -728,7 +728,7 @@ def test_first_negative_point_operations(
     else:
         raise ValueError(f"Unknown operation: {operation}")
 
-    first_negative = result.first_negative_point()
+    first_negative = result.first_negative_point
 
     if expected_time_point is None:
         assert first_negative is None, f"Expected None for {test_id}, got {first_negative}"
@@ -832,11 +832,11 @@ def test_first_negative_point_after_remove(
     """Test first_negative_point after removing intervals."""
     handler = IntervalHandler(intervals=intervals)
     # Initially should have a negative point
-    assert handler.first_negative_point() is not None, f"Expected negative point initially for {test_id}"
+    assert handler.first_negative_point is not None, f"Expected negative point initially for {test_id}"
 
     # Remove the intervals
     handler.remove(remove_intervals)
-    first_negative = handler.first_negative_point()
+    first_negative = handler.first_negative_point
 
     if expected_after_remove is None:
         assert first_negative is None, f"Expected None after removal for {test_id}, got {first_negative}"
@@ -958,7 +958,7 @@ def test_first_negative_point_after_add(
 
     # Add the intervals
     handler.add(add_intervals)
-    first_negative = handler.first_negative_point()
+    first_negative = handler.first_negative_point
 
     if expected_after_add is None:
         assert first_negative is None, f"Expected None after adding for {test_id}, got {first_negative}"
