@@ -50,7 +50,7 @@ def _operate(
     """Only call this function through the methods bound to `IntervalHandler`."""
     if not isinstance(b, IntervalHandler):
         raise TypeError(f"unsupported operand type(s) for {operand.__name__}: " f"'{type(a)}' and '{type(b)}'")
-    change_times = set(n.time_point for n in itertools.chain(a.projection_graph(), b.projection_graph()))
+    change_times = set(n.time_point for n in itertools.chain(a.projection_graph, b.projection_graph))
 
     return IntervalHandler(
         intervals=[
@@ -87,7 +87,7 @@ def _area_during_interval(handler: IntervalHandler, during: Interval) -> timedel
         [first_node_in_interval],
         # ↓ Everything except the first node, since it's not ↓
         # ↓ necessarily part of the interval ↓
-        _relevant_nodes(handler.projection_graph(), during)[1:],
+        _relevant_nodes(handler.projection_graph, during)[1:],
         [last_node_in_interval],
     )
 
@@ -105,6 +105,7 @@ class IntervalHandler:
     __intervals: list[Interval]
     __projection_graph: SortedList[TimeValueNode]
     _tz: ZoneInfo | timezone | None
+    __first_negative: TimeValueNode | None = None
 
     def __init__(
         self,
@@ -166,6 +167,7 @@ class IntervalHandler:
             _make_range(self.__projection_graph, interval)
             for node in _relevant_nodes(self.__projection_graph, interval):
                 node._add_interval(interval)
+                self._try_refresh_first_negative_point(node)
 
     def remove(self, intervals: Collection[Interval]) -> None:
         """Removes without simplifying the intervals."""
@@ -174,9 +176,21 @@ class IntervalHandler:
         for interval in intervals:
             for node in _relevant_nodes(self.__projection_graph, interval):
                 node._remove_interval(interval)
+                self._try_refresh_first_negative_point(node)
 
         self.__projection_graph = SortedList(_simplify(self.__projection_graph))
+        if self.__first_negative is None:
+            self.__first_negative = next((n for n in self.__projection_graph if n.value < 0), None)
 
+    def _try_refresh_first_negative_point(self, node: TimeValueNode) -> None:
+        if node.value < 0:
+            if self.__first_negative is None or node.time_point < self.__first_negative.time_point:
+                self.__first_negative = node
+
+        if self.__first_negative and self.__first_negative.value >= 0:
+            self.__first_negative = None
+
+    @property
     def projection_graph(self) -> SortedList[TimeValueNode]:
         return SortedList(self.__projection_graph)
 
@@ -188,3 +202,7 @@ class IntervalHandler:
 
     def get_area(self, during: Interval) -> timedelta:
         return _area_during_interval(self, during)
+
+    @property
+    def first_negative_point(self) -> TimeValueNode | None:
+        return self.__first_negative
