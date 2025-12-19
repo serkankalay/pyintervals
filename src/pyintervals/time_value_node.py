@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from itertools import filterfalse
+from itertools import filterfalse, chain
 from typing import Sequence
 
 from sortedcontainers import SortedList
@@ -85,21 +85,44 @@ class TimeValueNode:
         if interval.end == self.time_point:
             self.__ending_intervals.remove(interval)
 
-    @staticmethod
-    def clone(given: TimeValueNode, to_time: datetime | None = None) -> TimeValueNode:
-        return (
-            TimeValueNode(given.time_point, SortedList(given.__intervals))
-            if not to_time
-            else TimeValueNode(
-                to_time,
+
+    def copy(self, to: datetime) -> TimeValueNode:
+        if to is None or to == self.time_point:
+            return TimeValueNode.clone(self)
+        else:
+            return TimeValueNode(
+                to,
                 SortedList(
                     filterfalse(
                         lambda x: x.is_degenerate(),
-                        given.__intervals,
+                        self.__intervals,
+                    )
+                ),
+                SortedList(
+                    filter(
+                        lambda x: x.start == to,
+                        chain(self.__intervals, self.__ending_intervals),
+                    )
+                ),
+                SortedList(
+                    filter(
+                        lambda x: x.end == to,
+                        chain(self.__intervals, self.__ending_intervals),
                     )
                 ),
             )
+
+
+    @staticmethod
+    def clone(given: TimeValueNode) -> TimeValueNode:
+        return TimeValueNode(
+            given.time_point,
+            SortedList(given.__intervals),
+            SortedList(given.__starting_intervals),
+            SortedList(given.__ending_intervals),
         )
+
+
 
 
 def _simplify(nodes: Sequence[TimeValueNode]) -> list[TimeValueNode]:
