@@ -40,8 +40,8 @@ def test_valid_interval(regular_interval):
 
 
 def test_degenerate_interval(degenerate_interval, regular_interval):
-    assert degenerate_interval.is_degenerate()
-    assert not regular_interval.is_degenerate()
+    assert degenerate_interval.is_degenerate
+    assert not regular_interval.is_degenerate
 
 
 @pytest.fixture

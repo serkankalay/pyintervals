@@ -12,12 +12,13 @@ from pyintervals.constants import TIME_ZERO
 from pyintervals.interval import contains_point
 
 
-@dataclass(frozen=True)
+@dataclass
 class TimeValueNode:
     time_point: datetime
     __intervals: SortedList[Interval] = field(default_factory=SortedList)
     __starting_intervals: SortedList[Interval] = field(default_factory=SortedList)
     __ending_intervals: SortedList[Interval] = field(default_factory=SortedList)
+    __value: float = 0.0
 
     @property
     def intervals(self) -> list[Interval]:
@@ -33,7 +34,7 @@ class TimeValueNode:
 
     @property
     def value(self) -> float:
-        return sum(i.value for i in self.__intervals if not i.is_degenerate())
+        return self.__value
 
     def is_redundant(self) -> bool:
         return self.time_point > TIME_ZERO and not self.__starting_intervals and not self.__ending_intervals
@@ -66,20 +67,30 @@ class TimeValueNode:
             raise NotImplementedError
         return self.time_point >= other.time_point
 
+    def __add(self, interval: Interval) -> None:
+        self.__intervals.add(interval)
+        if not interval.is_degenerate:
+            self.__value += interval.value
+
+    def __remove(self, interval: Interval) -> None:
+        self.__intervals.remove(interval)
+        if not interval.is_degenerate:
+            self.__value -= interval.value
+
     def _add_interval(self, interval: Interval) -> None:
         if interval.end == self.time_point:
             self.__ending_intervals.add(interval)
-            if interval.is_degenerate():
-                self.__intervals.add(interval)
-        elif not interval.is_degenerate():
-            self.__intervals.add(interval)
+            if interval.is_degenerate:
+                self.__add(interval)
+        elif not interval.is_degenerate:
+            self.__add(interval)
 
         if interval.start == self.time_point:
             self.__starting_intervals.add(interval)
 
     def _remove_interval(self, interval: Interval) -> None:
         if contains_point(interval, self.time_point):
-            self.__intervals.remove(interval)
+            self.__remove(interval)
         if interval.start == self.time_point:
             self.__starting_intervals.remove(interval)
         if interval.end == self.time_point:
@@ -93,7 +104,7 @@ class TimeValueNode:
                 to,
                 SortedList(
                     filterfalse(
-                        lambda x: x.is_degenerate(),
+                        lambda x: x.is_degenerate,
                         self.__intervals,
                     )
                 ),
@@ -109,6 +120,7 @@ class TimeValueNode:
                         chain(self.__intervals, self.__ending_intervals),
                     )
                 ),
+                self.__value,
             )
 
     @staticmethod
@@ -118,6 +130,7 @@ class TimeValueNode:
             SortedList(given.__intervals),
             SortedList(given.__starting_intervals),
             SortedList(given.__ending_intervals),
+            given.__value,
         )
 
 

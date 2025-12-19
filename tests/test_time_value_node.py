@@ -196,7 +196,7 @@ def test_copy_time_value_node(tvn: TimeValueNode, to_time: datetime | None) -> N
         if to_time is None
         else _tvn_with_intervals(
             TimeValueNode(to_time),
-            [t for t in tvn.intervals if not t.is_degenerate()],
+            [t for t in tvn.intervals if not t.is_degenerate],
         )
     )
     assert to_compare == TimeValueNode.copy(tvn, to_time)

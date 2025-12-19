@@ -69,7 +69,7 @@ def _relevant_nodes(
     nodes: SortedList[TimeValueNode],
     interval: Interval,
 ) -> list[TimeValueNode]:
-    if interval.is_degenerate():
+    if interval.is_degenerate:
         return [_active_node_at_time(nodes, interval.start)]
     else:
         return [
