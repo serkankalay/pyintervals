@@ -128,8 +128,8 @@ class TimeValueNode:
         return TimeValueNode(
             given.time_point,
             SortedList(given.__intervals),
-            SortedList(given.__starting_intervals),
-            SortedList(given.__ending_intervals),
+            list(given.__starting_intervals),
+            list(given.__ending_intervals),
             given.__value,
         )
 
