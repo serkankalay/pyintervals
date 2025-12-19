@@ -971,3 +971,248 @@ def test_first_negative_point_after_add(
         assert first_negative.value < 0, (
             f"Expected negative value after adding for {test_id}, " f"got {first_negative.value}"
         )
+
+
+@pytest.mark.parametrize(
+    "test_id,intervals,tz",
+    [
+        (
+            "clone_empty_handler",
+            [],
+            None,
+        ),
+        (
+            "clone_empty_handler_with_tz",
+            [],
+            None,  # Can add timezone test if needed
+        ),
+        (
+            "clone_single_interval",
+            [Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5)],
+            None,
+        ),
+        (
+            "clone_multiple_intervals",
+            [
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5),
+                Interval(datetime(2023, 1, 5), datetime(2023, 1, 15), value=3),
+            ],
+            None,
+        ),
+        (
+            "clone_with_negative_intervals",
+            [
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=-5),
+                Interval(datetime(2023, 1, 5), datetime(2023, 1, 15), value=3),
+            ],
+            None,
+        ),
+        (
+            "clone_complex_intervals",
+            _complex_intervals(),
+            None,
+        ),
+        (
+            "clone_with_overlapping_intervals",
+            [
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5),
+                Interval(datetime(2023, 1, 5), datetime(2023, 1, 15), value=-3),
+                Interval(datetime(2023, 1, 8), datetime(2023, 1, 12), value=2),
+            ],
+            None,
+        ),
+        (
+            "clone_with_degenerate_intervals",
+            [
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5),
+                Interval(datetime(2023, 1, 5), datetime(2023, 1, 5), value=100),
+                Interval(datetime(2023, 1, 8), datetime(2023, 1, 15), value=3),
+            ],
+            None,
+        ),
+    ],
+    ids=[
+        "clone_empty_handler",
+        "clone_empty_handler_with_tz",
+        "clone_single_interval",
+        "clone_multiple_intervals",
+        "clone_with_negative_intervals",
+        "clone_complex_intervals",
+        "clone_with_overlapping_intervals",
+        "clone_with_degenerate_intervals",
+    ],
+)
+def test_clone_basic(test_id: str, intervals: list[Interval], tz: None) -> None:
+    """Test basic cloning functionality - clone preserves structure."""
+    handler = IntervalHandler(intervals=intervals, tz=tz)
+    cloned = handler.clone()
+
+    # Clone should have same intervals
+    assert cloned.intervals == handler.intervals, f"Intervals mismatch for {test_id}"
+
+    # Clone should have same projection graph structure
+    assert len(cloned.projection_graph) == len(handler.projection_graph), (
+        f"Projection graph length mismatch for {test_id}"
+    )
+    assert [n.time_point for n in cloned.projection_graph] == [
+        n.time_point for n in handler.projection_graph
+    ], f"Projection graph time points mismatch for {test_id}"
+
+    # Clone should have same first_negative_point
+    if handler.first_negative_point is None:
+        assert cloned.first_negative_point is None, f"Expected None first_negative_point for {test_id}"
+    else:
+        assert cloned.first_negative_point is not None, f"Expected non-None first_negative_point for {test_id}"
+        assert cloned.first_negative_point.time_point == handler.first_negative_point.time_point, (
+            f"First negative point time mismatch for {test_id}"
+        )
+        assert cloned.first_negative_point.value == handler.first_negative_point.value, (
+            f"First negative point value mismatch for {test_id}"
+        )
+
+    # Clone should have same timezone
+    assert cloned._tz == handler._tz, f"Timezone mismatch for {test_id}"
+
+
+@pytest.mark.parametrize(
+    "test_id,intervals",
+    [
+        (
+            "clone_independence_add_to_original",
+            [
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5),
+            ],
+        ),
+        (
+            "clone_independence_remove_from_original",
+            [
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5),
+                Interval(datetime(2023, 1, 5), datetime(2023, 1, 15), value=3),
+            ],
+        ),
+        (
+            "clone_independence_add_to_clone",
+            [
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5),
+            ],
+        ),
+        (
+            "clone_independence_remove_from_clone",
+            [
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5),
+                Interval(datetime(2023, 1, 5), datetime(2023, 1, 15), value=3),
+            ],
+        ),
+    ],
+    ids=[
+        "clone_independence_add_to_original",
+        "clone_independence_remove_from_original",
+        "clone_independence_add_to_clone",
+        "clone_independence_remove_from_clone",
+    ],
+)
+def test_clone_independence(test_id: str, intervals: list[Interval]) -> None:
+    """Test that clone is independent - modifications to one don't affect the other."""
+    handler = IntervalHandler(intervals=intervals)
+    cloned = handler.clone()
+
+    original_intervals_count = len(handler.intervals)
+    cloned_intervals_count = len(cloned.intervals)
+
+    if "add_to_original" in test_id:
+        # Add to original, clone should be unaffected
+        handler.add([Interval(datetime(2024, 1, 1), datetime(2024, 1, 10), value=10)])
+        assert len(handler.intervals) == original_intervals_count + 1, (
+            f"Original intervals count should increase for {test_id}"
+        )
+        assert len(cloned.intervals) == cloned_intervals_count, (
+            f"Cloned intervals count should remain unchanged for {test_id}"
+        )
+    elif "remove_from_original" in test_id:
+        # Remove from original, clone should be unaffected
+        to_remove = handler.intervals[0]
+        handler.remove([to_remove])
+        assert len(handler.intervals) == original_intervals_count - 1, (
+            f"Original intervals count should decrease for {test_id}"
+        )
+        assert len(cloned.intervals) == cloned_intervals_count, (
+            f"Cloned intervals count should remain unchanged for {test_id}"
+        )
+        assert to_remove in cloned.intervals, f"Removed interval should still be in clone for {test_id}"
+    elif "add_to_clone" in test_id:
+        # Add to clone, original should be unaffected
+        cloned.add([Interval(datetime(2024, 1, 1), datetime(2024, 1, 10), value=10)])
+        assert len(cloned.intervals) == cloned_intervals_count + 1, (
+            f"Cloned intervals count should increase for {test_id}"
+        )
+        assert len(handler.intervals) == original_intervals_count, (
+            f"Original intervals count should remain unchanged for {test_id}"
+        )
+    elif "remove_from_clone" in test_id:
+        # Remove from clone, original should be unaffected
+        to_remove = cloned.intervals[0]
+        cloned.remove([to_remove])
+        assert len(cloned.intervals) == cloned_intervals_count - 1, (
+            f"Cloned intervals count should decrease for {test_id}"
+        )
+        assert len(handler.intervals) == original_intervals_count, (
+            f"Original intervals count should remain unchanged for {test_id}"
+        )
+        assert to_remove in handler.intervals, f"Removed interval should still be in original for {test_id}"
+
+
+@pytest.mark.parametrize(
+    "test_id,intervals,test_times",
+    [
+        (
+            "clone_preserves_values",
+            [
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5),
+                Interval(datetime(2023, 1, 5), datetime(2023, 1, 15), value=-3),
+            ],
+            [
+                datetime(2020, 1, 1),  # Before any intervals
+                datetime(2023, 1, 1),  # At start
+                datetime(2023, 1, 5),  # Middle
+                datetime(2023, 1, 10),  # End
+                datetime(2025, 1, 1),  # After all intervals
+            ],
+        ),
+        (
+            "clone_preserves_node_values",
+            _complex_intervals(),
+            [
+                datetime(2020, 1, 1),  # Before any intervals
+                datetime(2023, 1, 1),  # At first interval start
+                datetime(2023, 1, 10),  # During first interval
+                datetime(2023, 1, 20, 5, 0),  # At degenerate interval
+                datetime(2023, 2, 1),  # At another interval start
+                datetime(2023, 2, 15),  # At degenerate interval
+                datetime(2025, 1, 1),  # After all intervals
+            ],
+        ),
+    ],
+    ids=[
+        "clone_preserves_values",
+        "clone_preserves_node_values",
+    ],
+)
+def test_clone_preserves_values(
+    test_id: str, intervals: list[Interval], test_times: list[datetime]
+) -> None:
+    """Test that clone preserves node values at various time points."""
+    handler = IntervalHandler(intervals=intervals)
+    cloned = handler.clone()
+
+    # Check values at various time points match
+    for time_point in test_times:
+        try:
+            original_value = handler.value_at_time(time_point)
+            cloned_value = cloned.value_at_time(time_point)
+            assert original_value == cloned_value, (
+                f"Value mismatch at {time_point} for {test_id}: "
+                f"original={original_value}, cloned={cloned_value}"
+            )
+        except RuntimeError:
+            # If time point is out of range, both should fail
+            pass
