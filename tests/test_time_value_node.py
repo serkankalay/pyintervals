@@ -190,7 +190,7 @@ def test_time_value_node_comparison(
         ),
     ],
 )
-def test_clone_time_value_node(tvn: TimeValueNode, to_time: datetime | None) -> None:
+def test_copy_time_value_node(tvn: TimeValueNode, to_time: datetime | None) -> None:
     to_compare = (
         tvn
         if to_time is None
@@ -199,7 +199,7 @@ def test_clone_time_value_node(tvn: TimeValueNode, to_time: datetime | None) -> 
             [t for t in tvn.intervals if not t.is_degenerate()],
         )
     )
-    assert to_compare == TimeValueNode.clone(tvn, to_time)
+    assert to_compare == TimeValueNode.copy(tvn, to_time)
 
 
 _normal_interval_with_value = partial(
@@ -371,3 +371,185 @@ def test_relevant_nodes(
     expected_node_count,
 ) -> None:
     assert len(_relevant_nodes(nodes, interval)) == expected_node_count
+
+
+@pytest.mark.parametrize(
+    "test_id,time_point,intervals",
+    [
+        (
+            "clone_with_starting_interval",
+            datetime(2023, 1, 1),
+            [Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5)],
+        ),
+        (
+            "clone_with_ending_interval",
+            datetime(2023, 1, 10),
+            [Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5)],
+        ),
+        (
+            "clone_with_starting_and_ending_interval",
+            datetime(2023, 1, 5),
+            [
+                Interval(datetime(2023, 1, 5), datetime(2023, 1, 10), value=3),
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 5), value=2),
+            ],
+        ),
+        (
+            "clone_with_degenerate_at_time_point",
+            datetime(2023, 1, 5),
+            [Interval(datetime(2023, 1, 5), datetime(2023, 1, 5), value=100)],
+        ),
+        (
+            "clone_with_multiple_starting_intervals",
+            datetime(2023, 1, 1),
+            [
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5),
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 15), value=3),
+            ],
+        ),
+        (
+            "clone_with_multiple_ending_intervals",
+            datetime(2023, 1, 10),
+            [
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5),
+                Interval(datetime(2023, 1, 5), datetime(2023, 1, 10), value=3),
+            ],
+        ),
+        (
+            "clone_with_overlapping_intervals",
+            datetime(2023, 1, 5),
+            [
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5),
+                Interval(datetime(2023, 1, 5), datetime(2023, 1, 15), value=3),
+            ],
+        ),
+        (
+            "clone_with_interval_containing_time_point",
+            datetime(2023, 1, 5),
+            [Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5)],
+        ),
+    ],
+    ids=[
+        "clone_with_starting_interval",
+        "clone_with_ending_interval",
+        "clone_with_starting_and_ending_interval",
+        "clone_with_degenerate_at_time_point",
+        "clone_with_multiple_starting_intervals",
+        "clone_with_multiple_ending_intervals",
+        "clone_with_overlapping_intervals",
+        "clone_with_interval_containing_time_point",
+    ],
+)
+def test_clone_preserves_starting_and_ending_intervals(
+    test_id: str, time_point: datetime, intervals: list[Interval]
+) -> None:
+    """Test that TimeValueNode.clone preserves starting_intervals and ending_intervals."""
+    original = TimeValueNode(time_point=time_point)
+    for interval in intervals:
+        original._add_interval(interval)
+
+    cloned = TimeValueNode.clone(original)
+
+    # Verify intervals are cloned
+    assert cloned.intervals == original.intervals, (
+        f"Intervals mismatch for {test_id}: "
+        f"original={original.intervals}, cloned={cloned.intervals}"
+    )
+
+    # Verify starting_intervals are cloned
+    assert cloned.starting_intervals == original.starting_intervals, (
+        f"Starting intervals mismatch for {test_id}: "
+        f"original={original.starting_intervals}, cloned={cloned.starting_intervals}"
+    )
+
+    # Verify ending_intervals are cloned
+    assert cloned.ending_intervals == original.ending_intervals, (
+        f"Ending intervals mismatch for {test_id}: "
+        f"original={original.ending_intervals}, cloned={cloned.ending_intervals}"
+    )
+
+    # Verify cloned lists are independent (same objects, but different containers)
+    # The intervals themselves should be the same objects, but the lists should be different
+    assert cloned.intervals is not original.intervals, (
+        f"Cloned intervals list should be a different object for {test_id}"
+    )
+    assert cloned.starting_intervals is not original.starting_intervals, (
+        f"Cloned starting_intervals list should be a different object for {test_id}"
+    )
+    assert cloned.ending_intervals is not original.ending_intervals, (
+        f"Cloned ending_intervals list should be a different object for {test_id}"
+    )
+
+
+@pytest.mark.parametrize(
+    "test_id,time_point,intervals,to_time,expected_starting,expected_ending",
+    [
+        (
+            "clone_with_to_time_at_interval_start",
+            datetime(2023, 1, 1),
+            [Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5)],
+            datetime(2023, 1, 1),
+            [Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5)],
+            [],
+        ),
+        (
+            "clone_with_to_time_at_interval_end",
+            datetime(2023, 1, 10),
+            [Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5)],
+            datetime(2023, 1, 10),
+            [],
+            [Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5)],
+        ),
+        (
+            "clone_with_to_time_middle_of_interval",
+            datetime(2023, 1, 5),
+            [Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5)],
+            datetime(2023, 1, 5),
+            [],
+            [],
+        ),
+        (
+            "clone_with_to_time_multiple_intervals",
+            datetime(2023, 1, 1),
+            [
+                Interval(datetime(2023, 1, 1), datetime(2023, 1, 10), value=5),
+                Interval(datetime(2023, 1, 5), datetime(2023, 1, 15), value=3),
+            ],
+            datetime(2023, 1, 5),
+            [Interval(datetime(2023, 1, 5), datetime(2023, 1, 15), value=3)],
+            [],
+        ),
+    ],
+    ids=[
+        "clone_with_to_time_at_interval_start",
+        "clone_with_to_time_at_interval_end",
+        "clone_with_to_time_middle_of_interval",
+        "clone_with_to_time_multiple_intervals",
+    ],
+)
+def test_copy_recalculates_starting_and_ending_intervals(
+    test_id: str,
+    time_point: datetime,
+    intervals: list[Interval],
+    to_time: datetime,
+    expected_starting: list[Interval],
+    expected_ending: list[Interval],
+) -> None:
+    """Test that TimeValueNode.clone with to_time recalculates starting_intervals and ending_intervals based on new time_point."""
+    original = TimeValueNode(time_point=time_point)
+    for interval in intervals:
+        original._add_interval(interval)
+
+    cloned = TimeValueNode.copy(original, to=to_time)
+
+    # When cloning with to_time, starting_intervals and ending_intervals should be recalculated
+    # based on the new time_point (to_time), not preserved from the original
+    assert cloned.starting_intervals == expected_starting, (
+        f"Starting intervals mismatch for {test_id}: "
+        f"expected={expected_starting}, got={cloned.starting_intervals}"
+    )
+
+    assert cloned.ending_intervals == expected_ending, (
+        f"Ending intervals mismatch for {test_id}: "
+        f"expected={expected_ending}, got={cloned.ending_intervals}"
+    )

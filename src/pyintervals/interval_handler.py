@@ -23,7 +23,7 @@ def _to_new_node(
     if active_node is None:
         return TimeValueNode(time_point)
 
-    return TimeValueNode.clone(active_node, time_point) if active_node.time_point < time_point else None
+    return TimeValueNode.copy(active_node, time_point) if active_node.time_point < time_point else None
 
 
 def _active_node_at_time(nodes: SortedList[TimeValueNode], when: datetime) -> TimeValueNode:
@@ -80,8 +80,8 @@ def _relevant_nodes(
 
 
 def _area_during_interval(handler: IntervalHandler, during: Interval) -> timedelta:
-    first_node_in_interval = TimeValueNode.clone(handler.node_at_time(during.start), during.start)
-    last_node_in_interval = TimeValueNode.clone(handler.node_at_time(during.end), during.end)
+    first_node_in_interval = handler.node_at_time(during.start).copy(during.start)
+    last_node_in_interval = handler.node_at_time(during.end).copy(during.end)
 
     relevant_nodes = itertools.chain(
         [first_node_in_interval],
@@ -181,6 +181,21 @@ class IntervalHandler:
         self.__projection_graph = SortedList(_simplify(self.__projection_graph))
         if self.__first_negative is None:
             self.__first_negative = next((n for n in self.__projection_graph if n.value < 0), None)
+
+    def clone(self) -> IntervalHandler:
+        cloned = IntervalHandler(tz=self._tz)
+        cloned.__intervals = list(self.__intervals)
+        cloned.__projection_graph = SortedList(
+            TimeValueNode.clone(given=node)
+            for node in self.__projection_graph
+        )
+        cloned.__first_negative = (
+            None
+            if self.__first_negative is None
+            else cloned.__projection_graph[self.__projection_graph.index(self.__first_negative)]
+        )
+        return cloned
+
 
     def _try_refresh_first_negative_point(self, node: TimeValueNode) -> None:
         if node.value < 0:
