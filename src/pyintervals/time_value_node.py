@@ -16,8 +16,8 @@ from pyintervals.interval import contains_point
 class TimeValueNode:
     time_point: datetime
     __intervals: SortedList[Interval] = field(default_factory=SortedList)
-    __starting_intervals: SortedList[Interval] = field(default_factory=SortedList)
-    __ending_intervals: SortedList[Interval] = field(default_factory=SortedList)
+    __starting_intervals: list[Interval] = field(default_factory=list)
+    __ending_intervals: list[Interval] = field(default_factory=list)
     __value: float = 0.0
 
     @property
@@ -79,14 +79,14 @@ class TimeValueNode:
 
     def _add_interval(self, interval: Interval) -> None:
         if interval.end == self.time_point:
-            self.__ending_intervals.add(interval)
+            self.__ending_intervals.append(interval)
             if interval.is_degenerate:
                 self.__add(interval)
         elif not interval.is_degenerate:
             self.__add(interval)
 
         if interval.start == self.time_point:
-            self.__starting_intervals.add(interval)
+            self.__starting_intervals.append(interval)
 
     def _remove_interval(self, interval: Interval) -> None:
         if contains_point(interval, self.time_point):
@@ -108,13 +108,13 @@ class TimeValueNode:
                         self.__intervals,
                     )
                 ),
-                SortedList(
+                list(
                     filter(
                         lambda x: x.start == to,
                         chain(self.__intervals, self.__ending_intervals),
                     )
                 ),
-                SortedList(
+                list(
                     filter(
                         lambda x: x.end == to,
                         chain(self.__intervals, self.__ending_intervals),
