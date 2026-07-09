@@ -796,8 +796,7 @@ version = "10.8.0"
 description = "More routines for operating on iterables, beyond itertools"
 optional = false
 python-versions = ">=3.9"
-groups = ["dev"]
-markers = "platform_machine != \"ppc64le\" and platform_machine != \"s390x\""
+groups = ["main", "dev"]
 files = [
     {file = "more_itertools-10.8.0-py3-none-any.whl", hash = "sha256:52d4362373dcf7c52546bc4af9a86ee7c4579df9a8dc268be0a2f949d376cc9b"},
     {file = "more_itertools-10.8.0.tar.gz", hash = "sha256:f638ddf8a1a0d134181275fb5d58b086ead7c6a72429ad725c67503f13ba30bd"},
@@ -1396,4 +1395,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0.0"
-content-hash = "ac6d32518affc3547c1d267889e312078daa1f49a35ad6c1508dc67ec9b91043"
+content-hash = "4c5d2212892861afc770dafafb06c586f81db533f0efa6d244e5ae5e5efed42c"
