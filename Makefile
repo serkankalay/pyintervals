@@ -37,7 +37,11 @@ nice: format check
 
 .PHONY: test
 test:
-	poetry run pytest --cov=pyintervals --cov-fail-under=95
+	poetry run pytest --cov=pyintervals --cov-fail-under=95 --ignore-glob='*_benchmark.py'
+
+.PHONY: benchmark
+benchmark:
+	poetry run pytest --benchmark-enable --benchmark-group-by=group -p no:cacheprovider --no-cov $(wildcard tests/*_benchmark.py)
 
 .PHONY: docs
 docs:
