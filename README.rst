@@ -29,11 +29,11 @@ Why?
 Inspired by a discussion and initial implementation in a professional project
 and a library I've been using in one of my previous jobs, **pyintervals** is born.
 
-Intervals pop-up frequently in programming, specifically in domains where you
+Intervals pop up frequently in programming, specifically in domains where you
 have an activity or a proxy for it.
 
 - Suppose you are implementing a single machine scheduling algorithm.
-  In order to schedule an operation, you need to makes sure that the machine is available
+  In order to schedule an operation, you need to make sure that the machine is available
   during your desired time of operation.
 - Or you are implementing a booking system and need to check
   that the hotel has at least 1 room with desired number of beds for the dates selected.
@@ -75,7 +75,7 @@ one ``contains`` the other.
   contains(my_first_interval,my_third_interval)
   >>> False
 
-**pyintervals** also support `degenerate` intervals, which have their ``start`` equal to their ``end``.
+**pyintervals** also supports `degenerate` intervals, which have their ``start`` equal to their ``end``.
 
 .. code-block:: python
 
@@ -89,6 +89,53 @@ one ``contains`` the other.
   overlaps(my_degenerate_interval, my_same_degenerate_interval)
   >>> True
 
+Grouping connected items
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Often you do not need a single interval but the *clusters* of items that belong together.
+Suppose a hotel wants to know which bookings form a continuous block of occupancy, so that
+the cleaning crew can be scheduled once per block. ``group_connected`` does exactly that:
+it takes your items and yields lists of the items that are connected.
+
+Items are connected when their intervals overlap *or touch*. A booking ending at 12:00 and
+another starting at 12:00 belong to the same group, whereas a gap of any length separates groups.
+
+.. code-block:: python
+
+  from dataclasses import dataclass
+  from pyintervals import Interval, group_connected
+
+  @dataclass
+  class Booking:
+      guest: str
+      interval: Interval  # Items expose their interval with this attribute
+
+  bookings = [
+      Booking("Ada", Interval(start=datetime(2025,7,21,9,0), end=datetime(2025,7,21,11,0))),
+      Booking("Bob", Interval(start=datetime(2025,7,21,10,0), end=datetime(2025,7,21,12,0))),
+      Booking("Cem", Interval(start=datetime(2025,7,21,12,0), end=datetime(2025,7,21,13,0))),
+      Booking("Dan", Interval(start=datetime(2025,7,21,15,0), end=datetime(2025,7,21,16,0))),
+  ]
+
+  [[booking.guest for booking in group] for group in group_connected(bookings)]
+  >>> [['Ada', 'Bob', 'Cem'], ['Dan']]
+
+Ada and Bob overlap, and Cem starts right when Bob leaves, so the three form one group.
+Dan comes after a gap and stands alone.
+
+If your items do not have an ``interval`` attribute, tell ``group_connected`` how to find it with ``key``.
+Items can be given in any order; groups are yielded in start order and items within a group are
+ordered by ``start``, with ties kept in input order.
+
+.. code-block:: python
+
+  group_connected(reversed(bookings), key=lambda booking: booking.interval)
+
+If your items are already ordered by ``start``, pass ``assume_sorted=True`` to stream the groups lazily.
+A violation of the order raises a ``ValueError`` as soon as it is encountered.
+
+Degenerate intervals have no timespan, so they are dropped and never appear in a group.
+
 What else?
 -----------
 
@@ -99,13 +146,13 @@ She/he suggested you to go there as soon as possible.
 You checked your agenda and seems you have an empty spot at your calendar starting at 12:30.
 The place is open between 9:00-12:00 and 13:00 - 16:00 daily.
 
-If you want to programatically check whether the shop is open at a given time **T**, then
+If you want to programmatically check whether the shop is open at a given time **T**, then
 you need to iterate over `all (in the worst case)` the time intervals the patisserie is open
 for the time you are curious about, 12:30 in this case. This will take `O(n)` time.
 
 Linear time is nice but can we not improve it? Well, with **pyintervals**, you can!
 What we essentially are curious about is the status of that beautiful store at a given time.
-**pintervals** allows you to fetch this value in `O(log n)` time.
+**pyintervals** allows you to fetch this value in `O(log n)` time.
 
 .. code-block:: python
 
@@ -166,6 +213,7 @@ Features:
 - Fundamentals:
     - ✅ Overlap controls
     - ✅ Contain controls
+    - ✅ Grouping connected objects with intervals
 - Interval Handler:
     - ✅ Own intervals with associated values
     - ✅ Provide value projection graph
@@ -185,7 +233,7 @@ Acknowledgements
 
 Following resources and people have inspired **pyintervals**:
 
-- `Always use [closed, open) intervals <https://fhur.me/posts/always-use-closed-open-intervalshttps://fhur.me/posts/always-use-closed-open-intervals>`_
+- `Always use [closed, open) intervals <https://fhur.me/posts/always-use-closed-open-intervals>`_
 - `Arie Bovenberg <https://github.com/ariebovenberg>`_
 - `pdfje (for initial setup of this project) <https://github.com/ariebovenberg/pdfje>`_
 - `Sam de Wringer <https://github.com/samdewr>`_
