@@ -19,7 +19,7 @@ def _by_interval_attribute(item: HasInterval) -> Interval:
     return item.interval
 
 
-def _sweep[T](items: Iterable[T], key: Callable[[T], Interval]) -> Iterator[list[T]]:
+def _sweep[T](items: Iterable[T], key: Callable[[T], Interval], group_touching: bool) -> Iterator[list[T]]:
     """Streams groups of connected items out of ``items``, which must be ordered by ``start``."""
     group: list[T] = []
     group_end: datetime | None = None
@@ -34,7 +34,11 @@ def _sweep[T](items: Iterable[T], key: Callable[[T], Interval]) -> Iterator[list
             raise ValueError("Items must be ordered by start when `assume_sorted=True`.")
         previous_start = interval.start
 
-        if group_end is not None and interval.start > group_end:
+        starts_new_group = group_end is not None and (
+            interval.start > group_end if group_touching else interval.start >= group_end
+        )
+
+        if starts_new_group:
             yield group
             group = []
             group_end = None
@@ -126,4 +130,4 @@ def group_connected[
     # Without `key`, the overloads guarantee `T` has an `interval` attribute.
     resolved_key = key if key is not None else cast(Callable[[T], Interval], _by_interval_attribute)
 
-    return _sweep(of, resolved_key) if assume_sorted else _via_handler(of, resolved_key)
+    return _sweep(of, resolved_key, group_touching) if assume_sorted else _via_handler(of, resolved_key)
