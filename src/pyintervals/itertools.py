@@ -97,9 +97,6 @@ def _via_handler[T](items: Iterable[T], key: Callable[[T], Interval], group_touc
             group = []
             group_end = None
 
-    if group:
-        yield group
-
 
 @overload
 def group_connected[
