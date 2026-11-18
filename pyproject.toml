@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyintervals"
-version = "1.7.0"
+version = "1.8.0"
 description = "Efficient interval operations."
 authors = ["Serkan Kalay <serkanosmankalay@gmail.com>"]
 license = "MIT"
@@ -8,6 +8,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
 ]
 readme = "README.rst"
 packages = [

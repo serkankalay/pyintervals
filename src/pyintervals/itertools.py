@@ -57,7 +57,7 @@ class _OwnedInterval[T](Interval):
     owner: T = field(kw_only=True, compare=False, repr=False)
 
 
-def _via_handler[T](items: Iterable[T], key: Callable[[T], Interval]) -> Iterator[list[T]]:
+def _via_handler[T](items: Iterable[T], key: Callable[[T], Interval], group_touching: bool) -> Iterator[list[T]]:
     """Groups connected items out of ``items`` in any order, by walking an ``IntervalHandler``'s graph."""
     intervals: list[_OwnedInterval[T]] = []
     for item in items:
@@ -73,13 +73,29 @@ def _via_handler[T](items: Iterable[T], key: Callable[[T], Interval]) -> Iterato
     handler.add(intervals)
 
     group: list[T] = []
+    group_end: datetime | None = None
     for node in handler.projection_graph:
         if node.value > 0:
-            # `starting_intervals` has one entry per item starting here, in input order.
-            group.extend(cast("_OwnedInterval[T]", i).owner for i in node.starting_intervals)
+            current_intervals = node.starting_intervals
+            new_group_end = max(interval.end for interval in current_intervals) if current_intervals else None
+            if group_touching:
+                # `starting_intervals` has one entry per item starting here, in input order.
+                if group_end is None or (new_group_end is not None and new_group_end > group_end):
+                    group_end = new_group_end
+                group.extend(cast("_OwnedInterval[T]", i).owner for i in current_intervals)
+            else:
+                if group_end is None or group_end > node.time_point:
+                    group.extend(cast("_OwnedInterval[T]", i).owner for i in current_intervals)
+                else:
+                    yield group
+                    group = list(cast("_OwnedInterval[T]", i).owner for i in current_intervals)
+
+                if group_end is None or (new_group_end is not None and new_group_end > group_end):
+                    group_end = new_group_end
         elif group:
             yield group
             group = []
+            group_end = None
 
     if group:
         yield group
@@ -126,8 +142,7 @@ def group_connected[
             overlapping items are, so ``[a, b)`` and ``[b, c)`` end up in separate groups unless
             another item overlaps both.
     """
-    # TODO: `group_touching` is accepted but not honoured yet; touching items are always grouped.
     # Without `key`, the overloads guarantee `T` has an `interval` attribute.
     resolved_key = key if key is not None else cast(Callable[[T], Interval], _by_interval_attribute)
 
-    return _sweep(of, resolved_key, group_touching) if assume_sorted else _via_handler(of, resolved_key)
+    return _sweep(of, resolved_key, group_touching) if assume_sorted else _via_handler(of, resolved_key, group_touching)
