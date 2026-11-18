@@ -1,15 +1,19 @@
 from __future__ import annotations
 
 import random
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, tzinfo
+from typing import Any
 from zoneinfo import ZoneInfo
 
 import pytest
 
 from pyintervals import Interval, group_connected
 from tests.helpers import THE_DATE
+
+UTC = timezone.utc
+AMSTERDAM = ZoneInfo("Europe/Amsterdam")
 
 
 @dataclass(frozen=True)
@@ -18,82 +22,129 @@ class Task:
     interval: Interval
 
 
+def at(hours: int, tz: tzinfo | None = None) -> datetime:
+    return (THE_DATE + timedelta(hours=hours)).replace(tzinfo=tz)
+
+
+def task(name: str, start: int, end: int, tz: tzinfo | None = None) -> Task:
+    return Task(name, Interval(at(start, tz), at(end, tz)))
+
+
+def names(groups: Iterable[list[Task]]) -> list[list[str]]:
+    return [[t.name for t in group] for group in groups]
+
+
 @pytest.fixture(params=[True, False], ids=["sweep", "handler"])
 def assume_sorted(request: pytest.FixtureRequest) -> bool:
     """Runs a test once per engine. Every input used with this fixture is already ordered by start."""
     return bool(request.param)
 
 
-def at(hours: int) -> datetime:
-    return THE_DATE + timedelta(hours=hours)
+# Inputs ordered by start, so both engines must produce the same groups.
+SORTED_CASES = [
+    pytest.param([], [], id="empty"),
+    pytest.param([task("a", 0, 1)], [["a"]], id="single"),
+    pytest.param([task("a", 0, 5), task("b", 3, 8)], [["a", "b"]], id="overlapping"),
+    pytest.param([task("a", 0, 5), task("b", 5, 8)], [["a", "b"]], id="touching"),
+    pytest.param([task("a", 0, 5), task("b", 6, 8)], [["a"], ["b"]], id="gap"),
+    pytest.param(
+        [task("a", 0, 3), task("b", 2, 5), task("c", 4, 7)],
+        [["a", "b", "c"]],
+        id="chain-of-overlaps",
+    ),
+    pytest.param(
+        # `b` ends before `a`, so `c` must still connect through `a`'s end.
+        [task("a", 0, 10), task("b", 1, 2), task("c", 9, 12)],
+        [["a", "b", "c"]],
+        id="nested-does-not-shrink-group-end",
+    ),
+    pytest.param(
+        [task("a", 0, 5), task("b", 0, 5), task("c", 0, 5)],
+        [["a", "b", "c"]],
+        id="identical-intervals-keep-input-order",
+    ),
+    pytest.param(
+        [task("a", 0, 10), task("b", 0, 2), task("c", 1, 3)],
+        [["a", "b", "c"]],
+        id="ordered-by-start-only-not-end",
+    ),
+    pytest.param(
+        [task("a", 0, 2), task("b", 1, 3), task("c", 10, 12), task("d", 20, 25), task("e", 24, 26)],
+        [["a", "b"], ["c"], ["d", "e"]],
+        id="multiple-groups-in-start-order",
+    ),
+    pytest.param(
+        [task("a", 0, 5), task("point", 2, 2), task("b", 5, 8)],
+        [["a", "b"]],
+        id="degenerate-inside-dropped",
+    ),
+    pytest.param(
+        [task("a", 0, 5), task("point", 5, 5), task("b", 5, 8)],
+        [["a", "b"]],
+        id="degenerate-touching-dropped",
+    ),
+    pytest.param(
+        [task("a", 0, 2), task("point", 4, 4), task("b", 6, 8)],
+        [["a"], ["b"]],
+        id="degenerate-isolated-dropped",
+    ),
+    pytest.param([task("p", 1, 1), task("q", 1, 1)], [], id="only-degenerate"),
+    pytest.param(
+        [task("a", 0, 5, UTC), task("b", 5, 8, UTC)],
+        [["a", "b"]],
+        id="timezone-aware",
+    ),
+]
+
+# Inputs not ordered by start, which only the handler engine accepts.
+UNSORTED_CASES = [
+    pytest.param(
+        [task("d", 20, 25), task("b", 1, 3), task("c", 10, 12), task("e", 24, 26), task("a", 0, 2)],
+        [["a", "b"], ["c"], ["d", "e"]],
+        id="groups-in-start-order",
+    ),
+    pytest.param(
+        [task("z", 5, 9), task("a", 0, 5), task("b", 0, 5), task("c", 0, 3)],
+        [["a", "b", "c", "z"]],
+        id="ties-keep-input-order",
+    ),
+    pytest.param(
+        [task("a", 5, 8, AMSTERDAM), task("b", 0, 5, AMSTERDAM)],
+        [["b", "a"]],
+        id="timezone-inferred-from-items",
+    ),
+]
+
+ERROR_CASES = [
+    pytest.param(
+        [task("a", 5, 8), task("b", 0, 2)],
+        {"assume_sorted": True},
+        ValueError,
+        id="unsorted-declared-sorted",
+    ),
+    pytest.param(
+        [task("naive", 0, 5), task("aware", 5, 8, UTC)],
+        {},
+        TypeError,
+        id="mixed-naive-and-aware",
+    ),
+]
 
 
-def task(name: str, start: int, end: int) -> Task:
-    return Task(name, Interval(at(start), at(end)))
+@pytest.mark.parametrize("items,expected", SORTED_CASES)
+def test_groups_sorted_input(items: list[Task], expected: list[list[str]], assume_sorted: bool) -> None:
+    assert names(group_connected(items, assume_sorted=assume_sorted)) == expected
 
 
-def names(groups: Iterator[list[Task]]) -> list[list[str]]:
-    return [[t.name for t in group] for group in groups]
+@pytest.mark.parametrize("items,expected", UNSORTED_CASES)
+def test_handler_groups_unsorted_input(items: list[Task], expected: list[list[str]]) -> None:
+    assert names(group_connected(items)) == expected
 
 
-def test_empty_input_yields_nothing(assume_sorted: bool) -> None:
-    assert list(group_connected([], assume_sorted=assume_sorted)) == []
-
-
-def test_single_item_is_its_own_group(assume_sorted: bool) -> None:
-    a = task("a", 0, 1)
-    assert list(group_connected([a], assume_sorted=assume_sorted)) == [[a]]
-
-
-def test_overlapping_items_are_grouped(assume_sorted: bool) -> None:
-    items = [task("a", 0, 5), task("b", 3, 8)]
-    assert names(group_connected(items, assume_sorted=assume_sorted)) == [["a", "b"]]
-
-
-def test_touching_items_are_grouped(assume_sorted: bool) -> None:
-    items = [task("a", 0, 5), task("b", 5, 8)]
-    assert names(group_connected(items, assume_sorted=assume_sorted)) == [["a", "b"]]
-
-
-def test_gap_separates_groups(assume_sorted: bool) -> None:
-    items = [task("a", 0, 5), task("b", 6, 8)]
-    assert names(group_connected(items, assume_sorted=assume_sorted)) == [["a"], ["b"]]
-
-
-def test_chain_of_overlaps_is_one_group(assume_sorted: bool) -> None:
-    items = [task("a", 0, 3), task("b", 2, 5), task("c", 4, 7)]
-    assert names(group_connected(items, assume_sorted=assume_sorted)) == [["a", "b", "c"]]
-
-
-def test_nested_item_does_not_shrink_group_end(assume_sorted: bool) -> None:
-    # `b` ends before `a`, so `c` must still connect through `a`'s end.
-    items = [task("a", 0, 10), task("b", 1, 2), task("c", 9, 12)]
-    assert names(group_connected(items, assume_sorted=assume_sorted)) == [["a", "b", "c"]]
-
-
-def test_identical_intervals_on_distinct_objects_are_kept_in_input_order(assume_sorted: bool) -> None:
-    items = [task("a", 0, 5), task("b", 0, 5), task("c", 0, 5)]
-    assert names(group_connected(items, assume_sorted=assume_sorted)) == [["a", "b", "c"]]
-
-
-def test_multiple_groups_come_out_in_start_order(assume_sorted: bool) -> None:
-    items = [task("a", 0, 2), task("b", 1, 3), task("c", 10, 12), task("d", 20, 25), task("e", 24, 26)]
-    assert names(group_connected(items, assume_sorted=assume_sorted)) == [["a", "b"], ["c"], ["d", "e"]]
-
-
-def test_degenerate_items_are_dropped(assume_sorted: bool) -> None:
-    items = [task("a", 0, 5), task("point-inside", 2, 2), task("point-touching", 5, 5), task("b", 5, 8)]
-    assert names(group_connected(items, assume_sorted=assume_sorted)) == [["a", "b"]]
-
-
-def test_isolated_degenerate_item_is_dropped(assume_sorted: bool) -> None:
-    items = [task("a", 0, 2), task("point", 4, 4), task("b", 6, 8)]
-    assert names(group_connected(items, assume_sorted=assume_sorted)) == [["a"], ["b"]]
-
-
-def test_only_degenerate_items_yield_nothing(assume_sorted: bool) -> None:
-    items = [task("p", 1, 1), task("q", 1, 1)]
-    assert list(group_connected(items, assume_sorted=assume_sorted)) == []
+@pytest.mark.parametrize("items,kwargs,error", ERROR_CASES)
+def test_invalid_input_raises(items: list[Task], kwargs: dict[str, Any], error: type[Exception]) -> None:
+    with pytest.raises(error):
+        list(group_connected(items, **kwargs))
 
 
 def test_key_function_is_used_for_arbitrary_shapes(assume_sorted: bool) -> None:
@@ -105,14 +156,8 @@ def test_key_function_is_used_for_arbitrary_shapes(assume_sorted: bool) -> None:
 def test_original_objects_are_yielded(assume_sorted: bool) -> None:
     a, b = task("a", 0, 5), task("b", 5, 8)
     (group,) = group_connected([a, b], assume_sorted=assume_sorted)
-    assert group[0] is a and group[1] is b
-
-
-def test_timezone_aware_items_are_supported(assume_sorted: bool) -> None:
-    tz = timezone.utc
-    a = Task("a", Interval(at(0).replace(tzinfo=tz), at(5).replace(tzinfo=tz)))
-    b = Task("b", Interval(at(5).replace(tzinfo=tz), at(8).replace(tzinfo=tz)))
-    assert names(group_connected([a, b], assume_sorted=assume_sorted)) == [["a", "b"]]
+    assert group[0] is a
+    assert group[1] is b
 
 
 def test_is_lazy_when_sorted() -> None:
@@ -124,44 +169,9 @@ def test_is_lazy_when_sorted() -> None:
             yield t
 
     groups = group_connected(source(), assume_sorted=True)
-    assert [t.name for t in next(groups)] == ["a"]
+    assert names([next(groups)]) == [["a"]]
     # Only enough input to know that the first group is complete has been read.
     assert consumed == ["a", "b"]
-
-
-def test_unsorted_input_raises_when_declared_sorted() -> None:
-    items = [task("a", 5, 8), task("b", 0, 2)]
-    with pytest.raises(ValueError):
-        list(group_connected(items, assume_sorted=True))
-
-
-def test_sorting_is_by_start_only_not_end() -> None:
-    items = [task("a", 0, 10), task("b", 0, 2), task("c", 1, 3)]
-    assert names(group_connected(items, assume_sorted=True)) == [["a", "b", "c"]]
-
-
-def test_handler_groups_unsorted_input_in_start_order() -> None:
-    items = [task("d", 20, 25), task("b", 1, 3), task("c", 10, 12), task("e", 24, 26), task("a", 0, 2)]
-    assert names(group_connected(items)) == [["a", "b"], ["c"], ["d", "e"]]
-
-
-def test_handler_keeps_ties_in_input_order() -> None:
-    items = [task("z", 5, 9), task("a", 0, 5), task("b", 0, 5), task("c", 0, 3)]
-    assert names(group_connected(items)) == [["a", "b", "c", "z"]]
-
-
-def test_handler_infers_timezone_from_items() -> None:
-    tz = ZoneInfo("Europe/Amsterdam")
-    a = Task("a", Interval(at(5).replace(tzinfo=tz), at(8).replace(tzinfo=tz)))
-    b = Task("b", Interval(at(0).replace(tzinfo=tz), at(5).replace(tzinfo=tz)))
-    assert names(group_connected([a, b])) == [["b", "a"]]
-
-
-def test_mixed_naive_and_aware_items_raise() -> None:
-    naive = task("naive", 0, 5)
-    aware = Task("aware", Interval(at(5).replace(tzinfo=timezone.utc), at(8).replace(tzinfo=timezone.utc)))
-    with pytest.raises(TypeError):
-        list(group_connected([naive, aware]))
 
 
 @pytest.mark.parametrize("seed", range(25))
